@@ -40,6 +40,11 @@ if (!UI.startBtn || !UI.stopBtn) {
   throw new Error('Required UI elements missing');
 }
 
+// Ensure buttons are in correct initial state
+UI.startBtn.disabled = false;
+UI.stopBtn.disabled = true;
+console.log('Button states reset: startBtn enabled, stopBtn disabled');
+
 const cameraService = new CameraService(UI.video);
 const detectionEngine = new DetectionEngine(UI.video);
 const eyeTrackingEngine = new EyeTrackingEngine(UI.video);
@@ -352,7 +357,8 @@ function downloadCertificate() {
 }
 
 UI.startBtn.addEventListener('click', (e) => {
-  console.log('✓ Start button clicked');
+  console.log('✓ Start button clicked', e);
+  console.log('Start button disabled state:', UI.startBtn.disabled);
   try {
     startSession();
   } catch(err) {
@@ -362,7 +368,8 @@ UI.startBtn.addEventListener('click', (e) => {
 });
 
 UI.stopBtn.addEventListener('click', (e) => {
-  console.log('✓ Stop button clicked');
+  console.log('✓ Stop button clicked', e);
+  console.log('Stop button disabled state:', UI.stopBtn.disabled);
   try {
     stopSession();
   } catch(err) {
@@ -370,6 +377,13 @@ UI.stopBtn.addEventListener('click', (e) => {
     AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
   }
 });
+
+console.log('Button event listeners attached successfully');
+console.log('startBtn listener:', UI.startBtn.onclick);
+
+// Initialization complete
+console.log('✅ FocusPulse initialized successfully');
+console.log('Ready to start session. Click Start button.');
 
 // Report modal handlers
 const reportModal = document.getElementById('reportModal');
