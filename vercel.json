@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/lander",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lander/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}
