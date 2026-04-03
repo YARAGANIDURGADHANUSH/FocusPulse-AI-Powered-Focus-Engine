@@ -355,30 +355,46 @@ function downloadCertificate() {
   CertificateGenerator.downloadCertificate(category, categoryDetails, summary, focusMetrics);
 }
 
-UI.startBtn.addEventListener('click', (e) => {
-  console.log('✓ Start button clicked', e);
-  console.log('Start button disabled state:', UI.startBtn.disabled);
-  try {
-    startSession();
-  } catch(err) {
-    console.error('Error starting session:', err);
-    AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
-  }
-});
+// Wrap entire button setup in DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupButtons);
+} else {
+  setupButtons();
+}
 
-UI.stopBtn.addEventListener('click', (e) => {
-  console.log('✓ Stop button clicked', e);
-  console.log('Stop button disabled state:', UI.stopBtn.disabled);
-  try {
-    stopSession();
-  } catch(err) {
-    console.error('Error stopping session:', err);
-    AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
+function setupButtons() {
+  console.log('🔧 Setting up button event listeners...');
+  
+  // Double-check buttons exist
+  if (!UI.startBtn || !UI.stopBtn) {
+    console.error('❌ CRITICAL: Buttons not found!');
+    return;
   }
-});
 
-console.log('Button event listeners attached successfully');
-console.log('startBtn listener:', UI.startBtn.onclick);
+  UI.startBtn.addEventListener('click', (e) => {
+    console.log('✓ Start button clicked', e);
+    console.log('Start button disabled state:', UI.startBtn.disabled);
+    try {
+      startSession();
+    } catch(err) {
+      console.error('Error starting session:', err);
+      AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
+    }
+  });
+
+  UI.stopBtn.addEventListener('click', (e) => {
+    console.log('✓ Stop button clicked', e);
+    console.log('Stop button disabled state:', UI.stopBtn.disabled);
+    try {
+      stopSession();
+    } catch(err) {
+      console.error('Error stopping session:', err);
+      AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
+    }
+  });
+
+  console.log('✅ Button event listeners attached successfully');
+}
 
 // Initialization complete
 console.log('✅ FocusPulse initialized successfully');
@@ -404,5 +420,9 @@ newSessionBtn.addEventListener('click', () => {
 // Initialization complete
 console.log('✅ FocusPulse initialized successfully');
 console.log('Ready to start session. Click Start button.');
+
+// Export functions globally for inline onclick handlers
+window.startFocus = startSession;
+window.stopFocus = stopSession;
 
 export { startSession, stopSession };
