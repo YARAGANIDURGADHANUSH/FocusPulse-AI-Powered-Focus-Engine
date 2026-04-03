@@ -4,60 +4,1112 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FocusPulse — AI-Powered Focus Engine</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    /* ── DESIGN TOKENS ────────────────────────────────── */
+    :root {
+      --bg:        #0b0f1a;
+      --surface:   #141824;
+      --surface2:  #1c2235;
+      --border:    #242b3d;
+      --accent:    #00ffa3;
+      --accent2:   #00c4ff;
+      --warn:      #ff6b6b;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --ring-bg:   #1e2a3a;
+      --font-mono: 'Space Mono', monospace;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* subtle grid bg */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,163,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,163,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .app-shell {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* ── HEADER ───────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    header h1 {
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── CONTROLS ─────────────────────────────────────── */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .controls button {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 36px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #startBtn {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0,255,163,0.3);
+    }
+    #startBtn:hover:not(:disabled) {
+      background: #00ffb3;
+      box-shadow: 0 0 32px rgba(0,255,163,0.5);
+      transform: translateY(-1px);
+    }
+    #startBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    #stopBtn {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    #stopBtn:hover:not(:disabled) {
+      background: var(--warn);
+      color: #fff;
+      border-color: var(--warn);
+      box-shadow: 0 0 20px rgba(255,107,107,0.3);
+      transform: translateY(-1px);
+    }
+    #stopBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── MAIN LAYOUT ──────────────────────────────────── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 720px) {
+      .main-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── CARDS ────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card h2 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── CAMERA ───────────────────────────────────────── */
+    .camera-section { display: flex; flex-direction: column; gap: 16px; }
+    .video-wrap {
+      position: relative;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 4/3;
+    }
+    #video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .camera-label {
+      position: absolute;
+      bottom: 10px; left: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(0,0,0,0.6);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .camera-off-msg {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--muted); font-size: 0.85rem; gap: 8px;
+    }
+    .camera-off-msg svg { opacity: 0.4; }
+
+    /* ── FOCUS RING ───────────────────────────────────── */
+    .ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .ring-container {
+      position: relative;
+      width: 160px; height: 160px;
+    }
+    .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring-label {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+    }
+    #scoreValue {
+      font-family: var(--font-mono);
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    #scoreStatus {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── STATS ────────────────────────────────────────── */
+    .stats-section { display: flex; flex-direction: column; gap: 16px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-item {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── CATEGORIES ───────────────────────────────────── */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .cat-item {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+      border-left: 3px solid transparent;
+      transition: border-color 0.3s;
+    }
+    .cat-item.gamma { border-left-color: #ffd700; }
+    .cat-item.theta { border-left-color: var(--accent); }
+    .cat-item.beta  { border-left-color: var(--accent2); }
+    .cat-item.alpha { border-left-color: #a78bfa; }
+    .cat-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      min-width: 52px;
+      text-align: center;
+    }
+    .gamma .cat-badge { background: rgba(255,215,0,0.15); color: #ffd700; }
+    .theta .cat-badge { background: rgba(0,255,163,0.15); color: var(--accent); }
+    .beta  .cat-badge { background: rgba(0,196,255,0.15); color: var(--accent2); }
+    .alpha .cat-badge { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .cat-desc { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── WAVEFORM ─────────────────────────────────────── */
+    .waveform-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .waveform-section h2 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    #waveCanvas {
+      width: 100%;
+      height: 80px;
+      border-radius: 6px;
+      background: var(--surface2);
+      display: block;
+    }
+
+    /* ── LOG ──────────────────────────────────────────── */
+    .log-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .log-panel h2 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    #logPanel {
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .log-entry {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 6px 10px;
+      background: var(--surface2);
+      border-radius: 4px;
+      border-left: 2px solid var(--border);
+      animation: fadeIn 0.3s ease;
+    }
+    .log-entry.info  { border-left-color: var(--accent2); color: var(--accent2); }
+    .log-entry.warn  { border-left-color: #fbbf24; color: #fbbf24; }
+    .log-entry.good  { border-left-color: var(--accent); color: var(--accent); }
+    .log-entry.error { border-left-color: var(--warn); color: var(--warn); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    /* ── MODE SELECTOR ────────────────────────────────── */
+    .mode-selector {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .mode-btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn:hover { color: var(--text); border-color: var(--accent); }
+    .mode-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* ── MODAL ────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.visible { display: flex; }
+    .report-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 540px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .report-header h1 {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .report-header .timestamp {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .performance-badge {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 20px 0;
+    }
+    .badge-circle {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--accent);
+    }
+    .badge-info .cat-name { font-weight: 600; font-size: 1rem; }
+    .badge-info .cat-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .metrics-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin-bottom: 20px;
+    }
+    .metric {
+      background: var(--surface2);
+      border-radius: 8px; padding: 14px;
+    }
+    .metric-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; }
+    .metric-value { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; }
+    .insights-section {
+      background: var(--surface2);
+      border-radius: 8px; padding: 16px;
+      margin-bottom: 20px;
+      font-size: 0.88rem; line-height: 1.6; color: var(--muted);
+    }
+    .insights-section h3 {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .report-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary, .btn-secondary {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent); color: #000;
+    }
+    .btn-primary:hover { background: #00ffb3; }
+    .btn-secondary {
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* active session pulse */
+    @keyframes pulse-ring {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(0,255,163,0.4)); }
+      50% { filter: drop-shadow(0 0 14px rgba(0,255,163,0.8)); }
+    }
+    .session-active #focusRing { animation: pulse-ring 2s ease-in-out infinite; }
+  </style>
 </head>
 <body>
-  <main class="app-shell">
-    <header>
-      <h1>FocusPulse</h1>
-      <p>AI-powered session-grade focus coach</p>
-    </header>
+<main class="app-shell">
+  <header>
+    <h1>FocusPulse</h1>
+    <p>AI-powered session-grade focus coach</p>
+  </header>
 
-    <section class="controls">
-      <div class="buttons">
-        <button id="startBtn">Start</button>
-        <button id="stopBtn" disabled>Stop</button>
-      </div>
-    </section>
+  <!-- Mode selector -->
+  <div style="display:flex;justify-content:center;margin-bottom:20px;">
+    <div class="mode-selector" id="modeSelector">
+      <button class="mode-btn active" data-mode="theta">Theta · Deep Work</button>
+      <button class="mode-btn" data-mode="beta">Beta · Study</button>
+      <button class="mode-btn" data-mode="alpha">Alpha · Calm</button>
+      <button class="mode-btn" data-mode="gamma">Gamma · Peak</button>
+    </div>
+  </div>
 
-    <section class="status-grid">
-      <article class="card">
-        <h2>Focus Score</h2>
-        <div class="ring-container">
-          <svg viewBox="0 0 240 240" class="ring-svg">
-            <circle cx="120" cy="120" r="104" stroke="#2b3345" stroke-width="8" fill="none"></circle>
-            <circle id="focusRing" cx="120" cy="120" r="104" stroke="#00ffa3" stroke-width="8" fill="none" stroke-dasharray="653.45" stroke-dashoffset="653.45"></circle>
-          </svg>
-          <div class="ring-label">
-            <span id="scoreValue">0</span>
+  <section class="controls">
+    <button id="startBtn">▶ Start</button>
+    <button id="stopBtn" disabled>■ Stop</button>
+  </section>
+
+  <div class="main-layout">
+    <!-- LEFT: Camera -->
+    <div class="camera-section">
+      <div class="card" style="padding:0;overflow:hidden;flex:1;">
+        <div class="video-wrap" style="aspect-ratio:auto;height:100%;min-height:220px;">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="camera-label">● Live</div>
+          <div class="camera-off-msg" id="cameraOffMsg">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+            </svg>
+            <span>Camera inactive</span>
           </div>
         </div>
-        <p id="scoreStatus">Idle</p>
-      </article>
-
-      <article class="card">
-        <h2>Heatmap</h2>
-        <p id="focusMode">Relax</p>
-        <p>Duration: <span id="sessionDuration">0s</span></p>
-        <p>Distractions: <span id="distractionCount">0</span></p>
-        <p>Best Streak: <span id="streakValue">0s</span></p>
-      </article>
-    </section>
-
-    <section class="visuals">
-      <div class="video-wrap">
-        <video id="video" autoplay muted playsinline></video>
-        <div class="camera-label">Camera</div>
       </div>
-      <canvas id="waveCanvas" width="640" height="140"></canvas>
-    </section>
 
-    <section class="log-panel">
-      <h2>Event Log</h2>
-      <div id="logPanel"></div>
-    </section>
-  </main>
+      <!-- Focus ring card -->
+      <div class="card" id="scoreCard">
+        <h2>Focus Score</h2>
+        <div class="ring-wrap">
+          <div class="ring-container">
+            <svg viewBox="0 0 200 200" class="ring-svg">
+              <circle cx="100" cy="100" r="88" stroke="#1e2a3a" stroke-width="10" fill="none"/>
+              <circle id="focusRing" cx="100" cy="100" r="88"
+                stroke="var(--accent)" stroke-width="10" fill="none"
+                stroke-dasharray="552.92" stroke-dashoffset="552.92"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="ring-label">
+              <span id="scoreValue">0</span>
+              <span id="scoreStatus">Idle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <script type="module" src="../src/main.js"></script>
+    <!-- RIGHT: Stats + Categories -->
+    <div class="stats-section">
+      <div class="card">
+        <h2>Session Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Duration</span>
+            <span class="stat-value" id="sessionDuration">0s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Distractions</span>
+            <span class="stat-value" id="distractionCount">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Best Streak</span>
+            <span class="stat-value" id="streakValue">0s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Score</span>
+            <span class="stat-value" id="avgScore">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FIX: "Delta" → "Theta" to match actual audio modes -->
+      <div class="card">
+        <h2>Focus Categories</h2>
+        <div class="categories-grid">
+          <div class="cat-item gamma">
+            <span class="cat-badge">Gamma</span>
+            <span class="cat-desc">Exceptional 85–100</span>
+          </div>
+          <div class="cat-item theta">
+            <span class="cat-badge">Theta</span>
+            <span class="cat-desc">Strong 75–84</span>
+          </div>
+          <div class="cat-item beta">
+            <span class="cat-badge">Beta</span>
+            <span class="cat-desc">Good 55–74</span>
+          </div>
+          <div class="cat-item alpha">
+            <span class="cat-badge">Alpha</span>
+            <span class="cat-desc">Building 0–54</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Current Mode</h2>
+        <div id="currentModeDisplay" style="font-family:var(--font-mono);font-size:1rem;color:var(--accent);">
+          Theta · Deep Work
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px;" id="modeFreq">
+          Binaural: 6 Hz carrier
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Waveform -->
+  <div class="waveform-section">
+    <h2>Focus Waveform</h2>
+    <canvas id="waveCanvas" width="1040" height="80"></canvas>
+  </div>
+
+  <!-- Event Log -->
+  <div class="log-panel">
+    <h2>Event Log</h2>
+    <div id="logPanel">
+      <div class="log-entry info">System ready. Select a mode and press Start.</div>
+    </div>
+  </div>
+</main>
+
+<!-- ── REPORT MODAL ──────────────────────────────────── -->
+<div class="modal-overlay" id="reportModal">
+  <div class="report-card" id="reportCardInner">
+    <div class="report-header">
+      <h1>FocusPulse Session Report</h1>
+      <p class="timestamp" id="reportTimestamp"></p>
+    </div>
+    <div class="performance-badge" id="performanceBadge">
+      <div class="badge-circle" id="badgeCircle">—</div>
+      <div class="badge-info">
+        <div class="cat-name" id="categoryName">—</div>
+        <div class="cat-tag" id="categoryLabelText">—</div>
+      </div>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-label">Session Duration</div>
+        <div class="metric-value" id="repDuration">0:00</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Average Focus</div>
+        <div class="metric-value" id="repAvgFocus">0%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Distractions</div>
+        <div class="metric-value" id="repDistractions">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Best Streak</div>
+        <div class="metric-value" id="repBestStreak">0s</div>
+      </div>
+    </div>
+    <div class="insights-section">
+      <h3>Session Insights</h3>
+      <p id="sessionInsight">—</p>
+    </div>
+    <div class="report-actions">
+      <button class="btn-primary" id="downloadPdfBtn">📊 Download Report</button>
+      <button class="btn-secondary" id="newSessionBtn">↻ New Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ALL APP LOGIC — self-contained, no external modules
+     FIX: Replaced ES module system (src/bootstrap.js) with
+     a single inline script. ES modules don't expose globals
+     to window, which broke startFocus/stopFocus entirely.
+═══════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  // ── State ──────────────────────────────────────────────
+  const state = {
+    running:      false,
+    startTime:    null,
+    duration:     0,
+    score:        0,
+    scoreHistory: [],
+    distractions: 0,
+    streak:       0,
+    bestStreak:   0,
+    lastFaceTime: 0,
+    stability:    1,
+    prevPixels:   null,
+    mode:         'theta',
+    audioCtx:     null,
+    oscL:         null,
+    oscR:         null,
+    mergerNode:   null,
+    animFrame:    null,
+    detectionInterval: null,
+    durationInterval:  null,
+    wavePoints:   new Array(80).fill(50),
+  };
+
+  // ── Mode config ─────────────────────────────────────────
+  const MODES = {
+    theta: { freq: 6,  label: 'Theta · Deep Work',  color: '#00ffa3' },
+    beta:  { freq: 18, label: 'Beta · Study',        color: '#00c4ff' },
+    alpha: { freq: 10, label: 'Alpha · Calm',         color: '#a78bfa' },
+    gamma: { freq: 40, label: 'Gamma · Peak',         color: '#ffd700' },
+  };
+
+  // ── DOM refs ────────────────────────────────────────────
+  const $  = id => document.getElementById(id);
+  const els = {
+    startBtn:        $('startBtn'),
+    stopBtn:         $('stopBtn'),
+    video:           $('video'),
+    focusRing:       $('focusRing'),
+    scoreValue:      $('scoreValue'),
+    scoreStatus:     $('scoreStatus'),
+    sessionDuration: $('sessionDuration'),
+    distractionCount:$('distractionCount'),
+    streakValue:     $('streakValue'),
+    avgScore:        $('avgScore'),
+    logPanel:        $('logPanel'),
+    waveCanvas:      $('waveCanvas'),
+    cameraOffMsg:    $('cameraOffMsg'),
+    scoreCard:       $('scoreCard'),
+    modeSelector:    $('modeSelector'),
+    currentMode:     $('currentModeDisplay'),
+    modeFreq:        $('modeFreq'),
+    reportModal:     $('reportModal'),
+    reportTimestamp: $('reportTimestamp'),
+    badgeCircle:     $('badgeCircle'),
+    categoryName:    $('categoryName'),
+    categoryLabelText: $('categoryLabelText'),
+    repDuration:     $('repDuration'),
+    repAvgFocus:     $('repAvgFocus'),
+    repDistractions: $('repDistractions'),
+    repBestStreak:   $('repBestStreak'),
+    sessionInsight:  $('sessionInsight'),
+    downloadPdfBtn:  $('downloadPdfBtn'),
+    newSessionBtn:   $('newSessionBtn'),
+  };
+
+  const RING_CIRC = 552.92;
+
+  // ── Logging ─────────────────────────────────────────────
+  function log(msg, type = 'info') {
+    const el = document.createElement('div');
+    el.className = `log-entry ${type}`;
+    const ts = new Date().toLocaleTimeString();
+    el.textContent = `[${ts}] ${msg}`;
+    els.logPanel.prepend(el);
+    // keep max 50 entries
+    while (els.logPanel.children.length > 50) {
+      els.logPanel.removeChild(els.logPanel.lastChild);
+    }
+  }
+
+  // ── Mode buttons ─────────────────────────────────────────
+  els.modeSelector.addEventListener('click', e => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn || state.running) return;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    const m = MODES[state.mode];
+    els.currentMode.textContent = m.label;
+    els.currentMode.style.color = m.color;
+    els.modeFreq.textContent = `Binaural: ${m.freq} Hz carrier`;
+    log(`Mode set to ${m.label}`, 'info');
+  });
+
+  // ── Camera ────────────────────────────────────────────────
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240, facingMode: 'user' }
+      });
+      els.video.srcObject = stream;
+      els.cameraOffMsg.style.display = 'none';
+      log('Camera started', 'good');
+      return true;
+    } catch (err) {
+      log('Camera unavailable — using simulated signals', 'warn');
+      return false;
+    }
+  }
+
+  function stopCamera() {
+    const stream = els.video.srcObject;
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    els.video.srcObject = null;
+    els.cameraOffMsg.style.display = 'flex';
+  }
+
+  // ── Face / pixel detection ────────────────────────────────
+  const offscreen = document.createElement('canvas');
+  offscreen.width = 80; offscreen.height = 60;
+  const offCtx = offscreen.getContext('2d');
+
+  function detectFrame() {
+    if (!els.video.srcObject || els.video.readyState < 2) {
+      // Fallback: simulate if no camera
+      return simulatedSignal();
+    }
+    offCtx.drawImage(els.video, 0, 0, 80, 60);
+    const data = offCtx.getImageData(0, 0, 80, 60).data;
+
+    // Face heuristic: skin-tone pixel ratio
+    let skinCount = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      if (r > 95 && g > 40 && b > 20 &&
+          Math.max(r,g,b) - Math.min(r,g,b) > 15 &&
+          r > g && r > b) skinCount++;
+    }
+    const faceScore = Math.min(100, (skinCount / (80*60/4)) * 400);
+
+    // Stability: frame diff
+    let stability = 100;
+    if (state.prevPixels) {
+      let diff = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        diff += Math.abs(data[i] - state.prevPixels[i]);
+      }
+      const normDiff = diff / (data.length / 4);
+      stability = Math.max(0, 100 - normDiff * 2);
+    }
+    state.prevPixels = new Uint8ClampedArray(data);
+
+    return { faceScore, stability };
+  }
+
+  function simulatedSignal() {
+    const t = (Date.now() - state.startTime) / 1000;
+    // Ramp up in first 30s, then oscillate
+    const ramp = Math.min(1, t / 30);
+    const noise = (Math.random() - 0.5) * 20;
+    const wave  = Math.sin(t * 0.3) * 10;
+    return {
+      faceScore: Math.max(0, Math.min(100, 60 * ramp + wave + noise)),
+      stability: Math.max(0, Math.min(100, 70 + wave + noise * 0.5)),
+    };
+  }
+
+  // ── Scoring engine ────────────────────────────────────────
+  function computeScore(faceScore, stability) {
+    const t = (Date.now() - state.startTime) / 1000;
+    const durationBonus = Math.min(20, t / 6);   // up to +20 over 2 min
+    const distrPenalty  = state.distractions * 3; // -3 per distraction
+
+    const raw = (faceScore * 0.5) + (stability * 0.3) + (durationBonus * 0.2 * 5) - distrPenalty;
+    return Math.round(Math.max(0, Math.min(100, raw)));
+  }
+
+  // ── Audio (binaural beats) ────────────────────────────────
+  function startAudio() {
+    try {
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = state.audioCtx;
+      const base = 200; // carrier
+      const beat = MODES[state.mode].freq;
+
+      const merger = ctx.createChannelMerger(2);
+      merger.connect(ctx.destination);
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = 0.08;
+      gainNode.connect(merger, 0, 0);
+      gainNode.connect(merger, 0, 1);
+
+      state.oscL = ctx.createOscillator();
+      state.oscL.frequency.value = base;
+      state.oscL.connect(gainNode);
+      state.oscL.start();
+
+      state.oscR = ctx.createOscillator();
+      state.oscR.frequency.value = base + beat;
+      state.oscR.connect(gainNode);
+      state.oscR.start();
+
+      log(`Binaural audio started — ${beat}Hz beat (${MODES[state.mode].label})`, 'good');
+    } catch (e) {
+      log('Audio unavailable: ' + e.message, 'warn');
+    }
+  }
+
+  function stopAudio() {
+    try {
+      state.oscL?.stop(); state.oscR?.stop();
+      state.audioCtx?.close();
+    } catch (_) {}
+    state.oscL = state.oscR = state.audioCtx = null;
+  }
+
+  // ── UI updates ────────────────────────────────────────────
+  function updateRing(score) {
+    const offset = RING_CIRC - (RING_CIRC * score / 100);
+    els.focusRing.style.strokeDashoffset = offset;
+    const color = score >= 85 ? '#ffd700'
+                : score >= 75 ? '#00ffa3'
+                : score >= 55 ? '#00c4ff'
+                : '#a78bfa';
+    els.focusRing.setAttribute('stroke', color);
+    els.scoreValue.style.color = color;
+  }
+
+  function updateStatus(score) {
+    if (!state.running) { els.scoreStatus.textContent = 'Idle'; return; }
+    if (score >= 85) els.scoreStatus.textContent = 'Exceptional';
+    else if (score >= 75) els.scoreStatus.textContent = 'Strong';
+    else if (score >= 55) els.scoreStatus.textContent = 'Good';
+    else els.scoreStatus.textContent = 'Building…';
+  }
+
+  // ── Waveform ──────────────────────────────────────────────
+  const wCtx = els.waveCanvas.getContext('2d');
+  function drawWave() {
+    const W = els.waveCanvas.width, H = els.waveCanvas.height;
+    wCtx.clearRect(0, 0, W, H);
+
+    // Push new point
+    if (state.running) {
+      const jitter = (Math.random() - 0.5) * 8;
+      const target = H - (state.score / 100) * (H - 10) - 5;
+      state.wavePoints.push(target + jitter);
+    } else {
+      state.wavePoints.push(H / 2);
+    }
+    if (state.wavePoints.length > 80) state.wavePoints.shift();
+
+    const step = W / (state.wavePoints.length - 1);
+    const grad = wCtx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, 'rgba(0,255,163,0.1)');
+    grad.addColorStop(1, 'rgba(0,196,255,0.8)');
+
+    wCtx.beginPath();
+    wCtx.moveTo(0, state.wavePoints[0]);
+    for (let i = 1; i < state.wavePoints.length - 1; i++) {
+      const cx = (i - 0.5) * step;
+      const cy = (state.wavePoints[i - 1] + state.wavePoints[i]) / 2;
+      wCtx.quadraticCurveTo((i-1)*step, state.wavePoints[i-1], cx, cy);
+    }
+    wCtx.lineTo(W, state.wavePoints[state.wavePoints.length - 1]);
+    wCtx.strokeStyle = grad;
+    wCtx.lineWidth = 2;
+    wCtx.stroke();
+
+    // Fill below
+    wCtx.lineTo(W, H); wCtx.lineTo(0, H); wCtx.closePath();
+    const fillGrad = wCtx.createLinearGradient(0, 0, 0, H);
+    fillGrad.addColorStop(0, 'rgba(0,255,163,0.15)');
+    fillGrad.addColorStop(1, 'rgba(0,255,163,0)');
+    wCtx.fillStyle = fillGrad;
+    wCtx.fill();
+
+    state.animFrame = requestAnimationFrame(drawWave);
+  }
+
+  // ── Main detection loop ───────────────────────────────────
+  function runDetection() {
+    const { faceScore, stability } = detectFrame();
+    const score = computeScore(faceScore, stability);
+    state.score = score;
+    state.scoreHistory.push(score);
+
+    // Distraction detection
+    const prevScore = state.scoreHistory[state.scoreHistory.length - 2] ?? score;
+    if (prevScore - score > 20) {
+      state.distractions++;
+      els.distractionCount.textContent = state.distractions;
+      log('Distraction detected — refocus!', 'warn');
+    }
+
+    // Streak tracking (consecutive good scores)
+    if (score >= 55) {
+      state.streak++;
+      if (state.streak > state.bestStreak) {
+        state.bestStreak = state.streak;
+        els.streakValue.textContent = state.bestStreak + 's';
+      }
+    } else {
+      state.streak = 0;
+    }
+
+    // Update UI
+    els.scoreValue.textContent = score;
+    updateRing(score);
+    updateStatus(score);
+
+    // Running avg
+    const avg = Math.round(state.scoreHistory.reduce((a,b) => a+b, 0) / state.scoreHistory.length);
+    els.avgScore.textContent = avg;
+  }
+
+  // ── Duration timer ────────────────────────────────────────
+  function startDurationTimer() {
+    state.durationInterval = setInterval(() => {
+      state.duration = Math.round((Date.now() - state.startTime) / 1000);
+      els.sessionDuration.textContent = state.duration + 's';
+    }, 1000);
+  }
+
+  // ── START ────────────────────────────────────────────────
+  // FIX: Direct addEventListener — no window.startFocus global needed.
+  // ES modules can't expose to window reliably; attaching here is the correct pattern.
+  els.startBtn.addEventListener('click', async function startSession() {
+    if (state.running) return;
+
+    log('Starting session…', 'info');
+    els.startBtn.disabled = true;
+    els.stopBtn.disabled  = false;
+    document.querySelectorAll('.mode-btn').forEach(b => b.disabled = true);
+
+    // Reset state
+    state.running      = true;
+    state.startTime    = Date.now();
+    state.duration     = 0;
+    state.score        = 0;
+    state.scoreHistory = [];
+    state.distractions = 0;
+    state.streak       = 0;
+    state.bestStreak   = 0;
+    state.prevPixels   = null;
+    state.wavePoints   = new Array(80).fill(els.waveCanvas.height / 2);
+    els.distractionCount.textContent = '0';
+    els.streakValue.textContent      = '0s';
+    els.avgScore.textContent         = '—';
+    els.scoreCard.classList.add('session-active');
+
+    await startCamera();
+    startAudio();
+    startDurationTimer();
+
+    state.detectionInterval = setInterval(runDetection, 1000);
+    if (!state.animFrame) drawWave();
+
+    log(`Session started in ${MODES[state.mode].label} mode`, 'good');
+  });
+
+  // ── STOP ─────────────────────────────────────────────────
+  els.stopBtn.addEventListener('click', function stopSession() {
+    if (!state.running) return;
+    state.running = false;
+
+    clearInterval(state.detectionInterval);
+    clearInterval(state.durationInterval);
+    cancelAnimationFrame(state.animFrame);
+    state.animFrame = null;
+
+    stopCamera();
+    stopAudio();
+
+    els.startBtn.disabled = false;
+    els.stopBtn.disabled  = true;
+    document.querySelectorAll('.mode-btn').forEach(b => b.disabled = false);
+    els.scoreCard.classList.remove('session-active');
+    updateStatus(0);
+
+    log('Session stopped. Generating report…', 'info');
+    showReport();
+  });
+
+  // ── REPORT ───────────────────────────────────────────────
+  function getCategory(avg) {
+    if (avg >= 85) return { name: 'Exceptional Focus', tag: 'Gamma · Peak Performance', color: '#ffd700' };
+    if (avg >= 75) return { name: 'Strong Focus',      tag: 'Theta · Deep Work',        color: '#00ffa3' };
+    if (avg >= 55) return { name: 'Good Focus',        tag: 'Beta · Study Mode',        color: '#00c4ff' };
+    return               { name: 'Building Focus',     tag: 'Alpha · Warming Up',       color: '#a78bfa' };
+  }
+
+  function getInsight(avg, distractions, duration) {
+    const mins = Math.floor(duration / 60);
+    const secs = duration % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+    if (avg >= 85) return `Outstanding session! You maintained exceptional focus for ${timeStr} with only ${distractions} distraction(s). Your cognitive performance was in the top tier.`;
+    if (avg >= 75) return `Strong session of ${timeStr}. Your focus was consistently high. Try minimizing distractions (${distractions} detected) to push into Gamma territory next time.`;
+    if (avg >= 55) return `Good ${timeStr} session. You showed solid focus with room to improve. ${distractions} distraction(s) were detected — try a quieter environment for deeper work.`;
+    return `You completed a ${timeStr} session. Focus was in the building phase. Consider shorter, more intense sessions and gradually extend duration as your focus improves.`;
+  }
+
+  function showReport() {
+    const avg = state.scoreHistory.length
+      ? Math.round(state.scoreHistory.reduce((a,b)=>a+b,0) / state.scoreHistory.length)
+      : 0;
+    const cat = getCategory(avg);
+    const mins = Math.floor(state.duration / 60);
+    const secs = state.duration % 60;
+    const durationStr = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+    els.reportTimestamp.textContent = new Date().toLocaleString();
+    els.badgeCircle.textContent = avg;
+    els.badgeCircle.style.borderColor = cat.color;
+    els.badgeCircle.style.color = cat.color;
+    els.categoryName.textContent = cat.name;
+    els.categoryLabelText.textContent = cat.tag;
+    els.repDuration.textContent     = durationStr;
+    els.repAvgFocus.textContent      = avg + '%';
+    els.repDistractions.textContent  = state.distractions;
+    els.repBestStreak.textContent    = state.bestStreak + 's';
+    els.sessionInsight.textContent   = getInsight(avg, state.distractions, state.duration);
+
+    els.reportModal.classList.add('visible');
+  }
+
+  els.newSessionBtn.addEventListener('click', () => {
+    els.reportModal.classList.remove('visible');
+    updateRing(0);
+    els.scoreValue.textContent = '0';
+    log('Ready for new session.', 'info');
+  });
+
+  els.downloadPdfBtn.addEventListener('click', () => {
+    if (typeof html2pdf === 'undefined') {
+      alert('PDF library not loaded. Check your internet connection.');
+      return;
+    }
+    html2pdf()
+      .set({
+        margin: 10,
+        filename: `focuspulse-report-${Date.now()}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .from(document.getElementById('reportCardInner'))
+      .save();
+  });
+
+  // Start waveform idle animation
+  drawWave();
+  log('FocusPulse ready. Choose a mode and press Start.', 'info');
+
+})();
+</script>
 </body>
 </html>
