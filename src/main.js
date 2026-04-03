@@ -268,6 +268,13 @@ function stopSession() {
   displayReportCard(summary);
 }
 
+// ========== CRITICAL: Export to window EARLY for onclick handlers ==========
+console.log('📌 Exporting functions to window...');
+window.startFocus = startSession;
+window.stopFocus = stopSession;
+console.log('✓ window.startFocus and window.stopFocus are now available');
+// =========================================================================
+
 // =========================================
 // REPORT CARD DISPLAY
 // =========================================
@@ -477,9 +484,5 @@ if (newSessionBtn && reportModal) {
 // =========================================
 console.log('✅ FocusPulse initialized successfully');
 console.log('Ready to start session. Click Start button.');
-
-// Export functions globally for inline onclick handlers
-window.startFocus = startSession;
-window.stopFocus = stopSession;
 
 export { startSession, stopSession };
