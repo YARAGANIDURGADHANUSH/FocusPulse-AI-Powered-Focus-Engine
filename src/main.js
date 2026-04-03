@@ -268,11 +268,6 @@ function stopSession() {
   displayReportCard(summary);
 }
 
-// ========== EXPORTS ==========
-console.log('📤 Exporting functions...');
-export { startSession, stopSession };
-console.log('✅ Functions exported');
-
 // =========================================
 // REPORT CARD DISPLAY
 // =========================================
