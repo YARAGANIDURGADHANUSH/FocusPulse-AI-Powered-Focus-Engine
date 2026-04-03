@@ -268,12 +268,10 @@ function stopSession() {
   displayReportCard(summary);
 }
 
-// ========== CRITICAL: Export to window EARLY for onclick handlers ==========
-console.log('📌 Exporting functions to window...');
-window.startFocus = startSession;
-window.stopFocus = stopSession;
-console.log('✓ window.startFocus and window.stopFocus are now available');
-// =========================================================================
+// ========== EXPORTS ==========
+console.log('📤 Exporting functions...');
+export { startSession, stopSession };
+console.log('✅ Functions exported');
 
 // =========================================
 // REPORT CARD DISPLAY

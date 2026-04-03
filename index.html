@@ -14,8 +14,8 @@
     </header>
 
     <section class="controls">
-      <button id="startBtn" onclick="try { window.startFocus?.(); } catch(e) { console.error('Button error:', e); }">Start</button>
-      <button id="stopBtn" disabled onclick="try { window.stopFocus?.(); } catch(e) { console.error('Button error:', e); }">Stop</button>
+      <button id="startBtn" onclick="safeStartClick()">Start</button>
+      <button id="stopBtn" disabled onclick="safeStopClick()">Stop</button>
     </section>
 
     <!-- Main Layout: Camera (Left) + Stats (Right) -->
@@ -140,9 +140,51 @@
     </div>
   </div>
 
-  <!-- Load html2pdf FIRST before modules -->
+  <!-- Load html2pdf FIRST -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Then load app module -->
-  <script type="module" src="src/main.js"></script>
+  
+  <!-- Bootstrap loader - handles dynamic module loading and global setup -->
+  <script type="module" src="src/bootstrap.js"></script>
+  
+  <!-- BACKUP: Inline onclick handlers as final fallback -->
+  <script>
+    function safeStartClick() {
+      try {
+        console.log('🔷 safeStartClick called');
+        if (window.startFocus) {
+          console.log('✓ Calling window.startFocus');
+          window.startFocus();
+        } else if (window.focusPulseApp?.functions?.startSession) {
+          console.log('✓ Calling via focusPulseApp');
+          window.focusPulseApp.functions.startSession();
+        } else {
+          console.error('❌ startFocus not available');
+          alert('App not ready yet. Please wait and try again.');
+        }
+      } catch (e) {
+        console.error('❌ Error:', e);
+        alert('Error: ' + e.message);
+      }
+    }
+    
+    function safeStopClick() {
+      try {
+        console.log('🔷 safeStopClick called');
+        if (window.stopFocus) {
+          console.log('✓ Calling window.stopFocus');
+          window.stopFocus();
+        } else if (window.focusPulseApp?.functions?.stopSession) {
+          console.log('✓ Calling via focusPulseApp');
+          window.focusPulseApp.functions.stopSession();
+        } else {
+          console.error('❌ stopSession not available');
+          alert('App not ready yet. Please wait and try again.');
+        }
+      } catch (e) {
+        console.error('❌ Error:', e);
+        alert('Error: ' + e.message);
+      }
+    }
+  </script>
 </body>
 </html>
