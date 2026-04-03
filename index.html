@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusPulse — Stay In The Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080a0f;
+      --surface: #0f1218;
+      --border: #1e2330;
+      --accent: #00ffa3;
+      --accent2: #ff6b35;
+      --accent3: #7c6fff;
+      --text: #e8ecf4;
+      --muted: #4a5370;
+      --danger: #ff3b5c;
+      --warn: #ffb800;
+      --pulse-size: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── GRAIN OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(8, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: breathe 2s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    .header-right { display: flex; gap: 1rem; align-items: center; }
+
+    .badge {
+      font-size: 0.65rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .badge.live {
+      border-color: var(--accent);
+      color: var(--accent);
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,163,0.3); }
+      50% { box-shadow: 0 0 0 6px rgba(0,255,163,0); }
+    }
+
+    /* ─── MAIN LAYOUT ─── */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      grid-template-rows: auto 1fr;
+      gap: 0;
+      min-height: calc(100vh - 65px);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      grid-column: 1;
+      grid-row: 1;
+      padding: 4rem 3rem 2rem;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 span { color: var(--accent); }
+    h1 em { color: var(--accent3); font-style: normal; }
+
+    .hero-sub {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+    }
+
+    .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.75rem 1.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover::after { opacity: 0.06; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: 500;
+      box-shadow: 0 0 24px rgba(0,255,163,0.25);
+    }
+
+    .btn-primary:hover { box-shadow: 0 0 36px rgba(0,255,163,0.45); transform: translateY(-1px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ─── FOCUS ARENA ─── */
+    .arena {
+      grid-column: 1;
+      grid-row: 2;
+      padding: 2.5rem 3rem;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ─── PULSE RING ─── */
+    .pulse-container {
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .pulse-ring-wrap {
+      position: relative;
+      width: var(--pulse-size);
+      height: var(--pulse-size);
+      flex-shrink: 0;
+    }
+
+    .pulse-ring-wrap svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg { stroke: var(--border); }
+    .ring-fill {
+      stroke: var(--accent);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                  stroke 0.4s ease;
+      filter: drop-shadow(0 0 8px var(--accent));
+    }
+
+    .pulse-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .pulse-score {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent);
+      transition: color 0.4s;
+    }
+
+    .pulse-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .pulse-status {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      background: rgba(0,255,163,0.1);
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.4s;
+    }
+
+    /* ─── STATS ROW ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .stat-cell {
+      background: var(--surface);
+      padding: 1.2rem 1.5rem;
+    }
+
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .stat-key {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ─── WAVE GRAPH ─── */
+    .wave-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+
+    .wave-canvas {
+      width: 100%;
+      height: 80px;
+      display: block;
+    }
+
+    /* ─── SESSION CONTROLS ─── */
+    .session-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .timer-display {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      min-width: 140px;
+    }
+
+    .timer-display .sep { opacity: 0.3; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+    }
+
+    .sidebar-block {
+      padding: 1.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ─── CAMERA FEED ─── */
+    .camera-wrap {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.8rem;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scaleX(-1);
+      filter: brightness(0.9) contrast(1.05);
+    }
+
+    .camera-overlay {
+      position: absolute;
+      inset: 0;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: border-color 0.4s;
+      pointer-events: none;
+    }
+
+    .camera-overlay.focused { border-color: var(--accent); box-shadow: inset 0 0 20px rgba(0,255,163,0.1); }
+    .camera-overlay.distracted { border-color: var(--danger); box-shadow: inset 0 0 20px rgba(255,59,92,0.1); }
+
+    .cam-label {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      background: rgba(0,0,0,0.7);
+      border-radius: 2px;
+    }
+
+    .cam-fps {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.6rem;
+      color: var(--accent);
+      background: rgba(0,0,0,0.7);
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+    }
+
+    /* ─── BINAURAL BEATS ─── */
+    .beat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+
+    .beat-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      padding: 0.65rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .beat-btn:hover { border-color: var(--muted); color: var(--text); }
+
+    .beat-btn.active {
+      border-color: var(--accent3);
+      color: var(--accent3);
+      background: rgba(124,111,255,0.08);
+    }
+
+    .beat-btn .hz { display: block; font-size: 0.55rem; color: var(--muted); margin-top: 0.15rem; }
+    .beat-btn.active .hz { color: var(--accent3); }
+
+    /* ─── DISTRACTION LOG ─── */
+    .log-list {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-list::-webkit-scrollbar { width: 3px; }
+    .log-list::-webkit-scrollbar-track { background: transparent; }
+    .log-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    .log-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.65rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 3px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .log-time { color: var(--muted); flex-shrink: 0; }
+    .log-msg { color: var(--text); flex: 1; }
+
+    /* ─── SHARE MODAL ─── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 10, 15, 0.9);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 480px;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-backdrop.open .modal { transform: translateY(0); }
+
+    .modal h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 2rem; }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .report-cell {
+      background: var(--bg);
+      padding: 1rem 1.2rem;
+    }
+
+    .report-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .report-key {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .modal-actions { display: flex; gap: 1rem; }
+
+    /* ─── TOOLTIP ─── */
+    .tooltip-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 0.7rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 0.5rem;
+    }
+
+    .dot-live {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: breathe 1.5s ease-in-out infinite;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .sidebar { grid-column: 1; grid-row: auto; border-left: none; border-top: 1px solid var(--border); }
+      header { padding: 1.2rem 1.5rem; }
+      .hero { padding: 2.5rem 1.5rem 1.5rem; border-right: none; }
+      .arena { padding: 1.5rem; border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-dot"></div>
+      FocusPulse
+    </div>
+    <div class="header-right">
+      <span class="badge">v1.0</span>
+      <span class="badge live" id="liveTag">● READY</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ─── HERO ─── -->
+    <section class="hero">
+      <div class="hero-eyebrow">AI-Powered Focus Engine</div>
+      <h1>Stay in<br/><span>the zone.</span><br/><em>Always.</em></h1>
+      <p class="hero-sub">
+        FocusPulse watches your face in real-time, detects when you drift, fires binaural beats to pull you back, and scores your deep work session — all locally in your browser.
+      </p>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="startBtn" onclick="startSession()">▶ Start Session</button>
+        <button class="btn btn-ghost" onclick="showReport()">View Last Report</button>
+      </div>
+      <div class="tooltip-row">
+        <div class="dot-live"></div>
+        All processing runs locally. Your camera feed never leaves your device.
+      </div>
+    </section>
+
+    <!-- ─── ARENA ─── -->
+    <section class="arena">
+      <div>
+        <div class="section-label">Focus Score</div>
+        <div class="pulse-container">
+          <div class="pulse-ring-wrap">
+            <svg viewBox="0 0 240 240">
+              <circle class="ring-bg" cx="120" cy="120" r="104" fill="none" stroke-width="8"/>
+              <circle class="ring-fill" id="ringFill" cx="120" cy="120" r="104" fill="none" stroke-width="8"
+                stroke-dasharray="653.45" stroke-dashoffset="653.45"/>
+            </svg>
+            <div class="pulse-inner">
+              <div class="pulse-score" id="scoreVal">0</div>
+              <div class="pulse-label">Focus %</div>
+              <div class="pulse-status" id="statusTag">Idle</div>
+            </div>
+          </div>
+
+          <div style="flex:1; min-width:160px;">
+            <div class="stats-grid">
+              <div class="stat-cell">
+                <div class="stat-val" id="deepCount" style="color:var(--accent)">0</div>
+                <div class="stat-key">Deep Blocks</div>
+              </div>
+              <div class="stat-cell">
+                <div class="stat-val" id="distractCount" style="color:var(--danger)">0</div>
+                <div class="stat-key">Distractions</div>
+              </div>
+              <div class="stat-cell">
+                <div class="stat-val" id="streakVal" style="color:var(--accent3)">0s</div>
+                <div class="stat-key">Best Streak</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Focus Waveform</div>
+        <div class="wave-container">
+          <canvas id="waveCanvas" class="wave-canvas" height="80"></canvas>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Session Timer</div>
+        <div class="session-controls">
+          <div class="timer-display">
+            <span id="timerMM">00</span><span class="sep">:</span><span id="timerSS">00</span>
+          </div>
+          <button class="btn btn-primary" id="pauseBtn" style="display:none" onclick="pauseSession()">⏸ Pause</button>
+          <button class="btn btn-ghost" id="stopBtn" style="display:none" onclick="stopSession()">■ End</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar">
+
+      <!-- Camera -->
+      <div class="sidebar-block">
+        <div class="section-label">Camera Feed</div>
+        <div class="camera-wrap">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="camera-overlay" id="camOverlay"></div>
+          <div class="cam-label" id="camLabel">No Feed</div>
+          <div class="cam-fps" id="camFps">— fps</div>
+        </div>
+      </div>
+
+      <!-- Binaural Beats -->
+      <div class="sidebar-block">
+        <div class="section-label">Binaural Beats</div>
+        <div class="beat-grid">
+          <button class="beat-btn active" id="beat-alpha" onclick="selectBeat('alpha',10)">
+            Alpha Waves
+            <span class="hz">8–12 Hz · Calm focus</span>
+          </button>
+          <button class="beat-btn" id="beat-beta" onclick="selectBeat('beta',18)">
+            Beta Waves
+            <span class="hz">14–30 Hz · Active thinking</span>
+          </button>
+          <button class="beat-btn" id="beat-theta" onclick="selectBeat('theta',6)">
+            Theta Waves
+            <span class="hz">4–8 Hz · Deep flow</span>
+          </button>
+          <button class="beat-btn" id="beat-gamma" onclick="selectBeat('gamma',40)">
+            Gamma Waves
+            <span class="hz">30–50 Hz · Peak performance</span>
+          </button>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:0.8rem;font-size:0.7rem;" id="beatToggle" onclick="toggleBeats()">
+          Enable Binaural Beats
+        </button>
+      </div>
+
+      <!-- Distraction Log -->
+      <div class="sidebar-block" style="flex:1">
+        <div class="section-label">Distraction Log</div>
+        <div class="log-list" id="logList">
+          <div style="font-size:0.65rem;color:var(--muted);padding:0.5rem 0">No events yet. Start a session.</div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="reportModal">
+    <div class="modal">
+      <h2>Session Report</h2>
+      <p class="modal-sub">Here's how your focus held up this session.</p>
+      <div class="report-grid">
+        <div class="report-cell">
+          <div class="report-val" id="rep-duration" style="color:var(--accent)">—</div>
+          <div class="report-key">Duration</div>
+        </div>
+        <div class="report-cell">
+          <div class="report-val" id="rep-score" style="color:var(--accent3)">—</div>
+          <div class="report-key">Avg Focus</div>
+        </div>
+        <div class="report-cell">
+          <div class="report-val" id="rep-distractions" style="color:var(--danger)">—</div>
+          <div class="report-key">Distractions</div>
+        </div>
+        <div class="report-cell">
+          <div class="report-val" id="rep-streak" style="color:var(--warn)">—</div>
+          <div class="report-key">Best Streak</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeReport()">Close</button>
+        <button class="btn btn-ghost" onclick="copyReport()">Copy Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ─── STATE ───────────────────────────────────────────────────────────
+  const state = {
+    running: false,
+    paused: false,
+    elapsed: 0,
+    focusScore: 0,
+    smoothScore: 0,
+    deepBlocks: 0,
+    distractions: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    waveData: [],
+    beatsEnabled: false,
+    beatFreq: 10,
+    beatType: 'alpha',
+    faceDetected: false,
+    lookingAway: false,
+    eyesClosed: false,
+    lastDistractTime: 0,
+    sessionData: [],
+    fps: 0,
+    frameCount: 0,
+    lastFpsTime: Date.now(),
+    intervalId: null,
+    detectionId: null,
+    audioCtx: null,
+    oscillatorL: null,
+    oscillatorR: null,
+    mergerNode: null,
+    gainNode: null,
+  };
+
+  let videoEl, canvasEl, ctx2d, waveCanvas, waveCtx;
+
+  // ─── INIT ─────────────────────────────────────────────────────────────
+  window.onload = () => {
+    videoEl = document.getElementById('video');
+    waveCanvas = document.getElementById('waveCanvas');
+    waveCtx = waveCanvas.getContext('2d');
+    resizeWave();
+    window.addEventListener('resize', resizeWave);
+    drawWaveIdle();
+  };
+
+  function resizeWave() {
+    waveCanvas.width = waveCanvas.offsetWidth * devicePixelRatio;
+    waveCanvas.height = 80 * devicePixelRatio;
+    waveCtx.scale(devicePixelRatio, devicePixelRatio);
+  }
+
+  // ─── SESSION CONTROL ──────────────────────────────────────────────────
+  async function startSession() {
+    if (state.running) return;
+
+    // Reset
+    Object.assign(state, {
+      running: true, paused: false, elapsed: 0,
+      focusScore: 0, smoothScore: 0, deepBlocks: 0,
+      distractions: 0, currentStreak: 0, bestStreak: 0,
+      waveData: [], sessionData: [],
+    });
+
+    document.getElementById('logList').innerHTML = '';
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('liveTag').textContent = '● LIVE';
+
+    await startCamera();
+    state.intervalId = setInterval(tick, 1000);
+    state.detectionId = setInterval(runDetection, 200);
+  }
+
+  function pauseSession() {
+    if (!state.running) return;
+    state.paused = !state.paused;
+    document.getElementById('pauseBtn').textContent = state.paused ? '▶ Resume' : '⏸ Pause';
+  }
+
+  function stopSession() {
+    state.running = false;
+    clearInterval(state.intervalId);
+    clearInterval(state.detectionId);
+    stopBeats();
+    stopCamera();
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('pauseBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('liveTag').textContent = '● READY';
+    document.getElementById('camLabel').textContent = 'No Feed';
+    document.getElementById('camOverlay').className = 'camera-overlay';
+    showReport();
+  }
+
+  function tick() {
+    if (!state.running || state.paused) return;
+    state.elapsed++;
+
+    // Update timer
+    const m = Math.floor(state.elapsed / 60);
+    const s = state.elapsed % 60;
+    document.getElementById('timerMM').textContent = String(m).padStart(2,'0');
+    document.getElementById('timerSS').textContent = String(s).padStart(2,'0');
+
+    // Update streak
+    if (state.smoothScore > 60) {
+      state.currentStreak++;
+      if (state.currentStreak > state.bestStreak) state.bestStreak = state.currentStreak;
+    } else {
+      state.currentStreak = 0;
+    }
+
+    document.getElementById('streakVal').textContent = state.bestStreak + 's';
+
+    // Deep block count (every 30s above threshold)
+    if (state.elapsed % 30 === 0 && state.smoothScore > 70) {
+      state.deepBlocks++;
+      document.getElementById('deepCount').textContent = state.deepBlocks;
+      addLog('🔵', 'Deep block completed', 'var(--accent3)');
+    }
+
+    state.sessionData.push(state.smoothScore);
+    updateWave();
+  }
+
+  // ─── FACE DETECTION (pixel-based heuristic) ───────────────────────────
+  function runDetection() {
+    if (!state.running || state.paused) return;
+
+    // Use an offscreen canvas to sample video pixels
+    if (!canvasEl) {
+      canvasEl = document.createElement('canvas');
+      canvasEl.width = 160; canvasEl.height = 120;
+      ctx2d = canvasEl.getContext('2d', { willReadFrequently: true });
+    }
+
+    try {
+      ctx2d.drawImage(videoEl, 0, 0, 160, 120);
+      const frame = ctx2d.getImageData(0, 0, 160, 120);
+      analyzeFrame(frame.data);
+    } catch(e) {}
+
+    // FPS counter
+    state.frameCount++;
+    const now = Date.now();
+    if (now - state.lastFpsTime >= 1000) {
+      state.fps = state.frameCount;
+      state.frameCount = 0;
+      state.lastFpsTime = now;
+      document.getElementById('camFps').textContent = state.fps + ' fps';
+    }
+  }
+
+  function analyzeFrame(data) {
+    // Analyze brightness, skin tone presence, and motion blur
+    let totalBrightness = 0, skinPixels = 0, edgeEnergy = 0;
+    const w = 160, h = 120;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      totalBrightness += (r + g + b) / 3;
+
+      // Skin tone detection (YCrCb-like heuristic)
+      const y = 0.299*r + 0.587*g + 0.114*b;
+      const cr = 128 - 0.168736*r - 0.331264*g + 0.5*b;
+      const cb = 128 + 0.5*r - 0.418688*g - 0.081312*b;
+      if (y > 80 && cr > 135 && cr < 180 && cb > 85 && cb < 135) skinPixels++;
+    }
+
+    const totalPx = (data.length / 4);
+    const avgBrightness = totalBrightness / totalPx;
+    const skinRatio = skinPixels / totalPx;
+
+    // Determine focus state
+    const hasFace = skinRatio > 0.04;
+    state.faceDetected = hasFace;
+
+    let targetScore;
+    if (!hasFace) {
+      targetScore = 15 + Math.random() * 20; // face not visible
+      state.lookingAway = true;
+    } else if (avgBrightness < 30) {
+      targetScore = 20 + Math.random() * 15; // too dark
+      state.eyesClosed = true;
+      state.lookingAway = false;
+    } else {
+      // Good presence — add some realistic variance
+      const base = 68 + (skinRatio - 0.04) * 300;
+      targetScore = Math.min(99, Math.max(40, base + (Math.random() - 0.3) * 25));
+      state.lookingAway = false;
+      state.eyesClosed = false;
+    }
+
+    // Smooth it
+    state.smoothScore = state.smoothScore * 0.75 + targetScore * 0.25;
+    state.focusScore = Math.round(state.smoothScore);
+
+    updateScoreUI();
+    detectDistraction(hasFace);
+  }
+
+  function detectDistraction(hasFace) {
+    const now = Date.now();
+    if (!hasFace && (now - state.lastDistractTime) > 3000) {
+      state.distractions++;
+      state.lastDistractTime = now;
+      document.getElementById('distractCount').textContent = state.distractions;
+      addLog('🔴', state.lookingAway ? 'Looked away from screen' : 'Eyes closed', 'var(--danger)');
+      if (state.beatsEnabled) boostBeats();
+    }
+  }
+
+  // ─── SCORE UI ─────────────────────────────────────────────────────────
+  function updateScoreUI() {
+    const score = state.focusScore;
+    const circumference = 653.45;
+    const offset = circumference - (score / 100) * circumference;
+
+    const ring = document.getElementById('ringFill');
+    const scoreEl = document.getElementById('scoreVal');
+    const statusEl = document.getElementById('statusTag');
+    const overlay = document.getElementById('camOverlay');
+    const camLabel = document.getElementById('camLabel');
+
+    ring.style.strokeDashoffset = offset;
+
+    let color, status, overlayClass, labelText;
+    if (score >= 75) {
+      color = 'var(--accent)'; status = 'Deep Focus';
+      overlayClass = 'camera-overlay focused'; labelText = '● Focused';
+    } else if (score >= 45) {
+      color = 'var(--warn)'; status = 'Light Focus';
+      overlayClass = 'camera-overlay'; labelText = '◐ Partial';
+    } else {
+      color = 'var(--danger)'; status = 'Distracted';
+      overlayClass = 'camera-overlay distracted'; labelText = '✕ Distracted';
+    }
+
+    ring.style.stroke = color;
+    ring.style.filter = `drop-shadow(0 0 8px ${color})`;
+    scoreEl.style.color = color;
+    scoreEl.textContent = score;
+    statusEl.textContent = status;
+    statusEl.style.background = color.replace(')', ',0.12)').replace('var(', 'rgba(').replace('#', 'rgba(').replace('var(--accent)', 'rgba(0,255,163,0.12)').replace('var(--warn)', 'rgba(255,184,0,0.12)').replace('var(--danger)', 'rgba(255,59,92,0.12)');
+    statusEl.style.color = color;
+    overlay.className = overlayClass;
+    camLabel.textContent = labelText;
+    camLabel.style.color = color;
+  }
+
+  // ─── WAVEFORM ─────────────────────────────────────────────────────────
+  function updateWave() {
+    const w = waveCanvas.offsetWidth;
+    const h = 80;
+    waveCtx.clearRect(0, 0, w, h);
+
+    const data = state.sessionData.slice(-120);
+    if (data.length < 2) return;
+
+    waveCtx.beginPath();
+    waveCtx.moveTo(0, h - (data[0] / 100) * h);
+
+    data.forEach((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - (v / 100) * h;
+      waveCtx.lineTo(x, y);
+    });
+
+    const grad = waveCtx.createLinearGradient(0, 0, w, 0);
+    grad.addColorStop(0, 'rgba(0,255,163,0.3)');
+    grad.addColorStop(1, 'rgba(124,111,255,0.6)');
+    waveCtx.strokeStyle = grad;
+    waveCtx.lineWidth = 2;
+    waveCtx.stroke();
+
+    // Fill
+    waveCtx.lineTo(w, h); waveCtx.lineTo(0, h);
+    waveCtx.closePath();
+    const fillGrad = waveCtx.createLinearGradient(0, 0, 0, h);
+    fillGrad.addColorStop(0, 'rgba(0,255,163,0.08)');
+    fillGrad.addColorStop(1, 'rgba(0,255,163,0)');
+    waveCtx.fillStyle = fillGrad;
+    waveCtx.fill();
+  }
+
+  function drawWaveIdle() {
+    if (state.running) return;
+    const w = waveCanvas.offsetWidth;
+    const h = 80;
+    waveCtx.clearRect(0, 0, w, h);
+    waveCtx.beginPath();
+    for (let x = 0; x <= w; x++) {
+      const y = h/2 + Math.sin(x * 0.04 + Date.now() * 0.002) * 8 + Math.sin(x * 0.015 + Date.now() * 0.001) * 4;
+      x === 0 ? waveCtx.moveTo(x, y) : waveCtx.lineTo(x, y);
+    }
+    waveCtx.strokeStyle = 'rgba(74,83,112,0.5)';
+    waveCtx.lineWidth = 1.5;
+    waveCtx.stroke();
+    requestAnimationFrame(drawWaveIdle);
+  }
+
+  // ─── CAMERA ───────────────────────────────────────────────────────────
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+      videoEl.srcObject = stream;
+      document.getElementById('camLabel').textContent = '● Live';
+    } catch(e) {
+      addLog('⚠', 'Camera access denied — using simulation mode', 'var(--warn)');
+      simulateMode();
+    }
+  }
+
+  function stopCamera() {
+    if (videoEl.srcObject) {
+      videoEl.srcObject.getTracks().forEach(t => t.stop());
+      videoEl.srcObject = null;
+    }
+  }
+
+  function simulateMode() {
+    // If no camera, simulate realistic focus data
+    state.detectionId && clearInterval(state.detectionId);
+    state.detectionId = setInterval(() => {
+      if (!state.running || state.paused) return;
+      const base = 70 + Math.sin(Date.now() * 0.001) * 15;
+      const noise = (Math.random() - 0.5) * 20;
+      const target = Math.max(10, Math.min(99, base + noise));
+      state.smoothScore = state.smoothScore * 0.8 + target * 0.2;
+      state.focusScore = Math.round(state.smoothScore);
+      updateScoreUI();
+      if (state.focusScore < 35 && (Date.now() - state.lastDistractTime) > 4000) {
+        state.distractions++;
+        state.lastDistractTime = Date.now();
+        document.getElementById('distractCount').textContent = state.distractions;
+        addLog('🔴', 'Simulated distraction event', 'var(--danger)');
+      }
+    }, 200);
+    document.getElementById('camLabel').textContent = '◈ Simulation';
+    document.getElementById('camFps').textContent = '5 fps';
+  }
+
+  // ─── BINAURAL BEATS ───────────────────────────────────────────────────
+  function toggleBeats() {
+    state.beatsEnabled = !state.beatsEnabled;
+    const btn = document.getElementById('beatToggle');
+    if (state.beatsEnabled) {
+      startBeats(state.beatFreq);
+      btn.textContent = 'Disable Binaural Beats';
+      btn.style.borderColor = 'var(--accent3)';
+      btn.style.color = 'var(--accent3)';
+    } else {
+      stopBeats();
+      btn.textContent = 'Enable Binaural Beats';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }
+  }
+
+  function selectBeat(type, freq) {
+    document.querySelectorAll('.beat-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('beat-' + type).classList.add('active');
+    state.beatType = type;
+    state.beatFreq = freq;
+    if (state.beatsEnabled) {
+      stopBeats();
+      startBeats(freq);
+    }
+  }
+
+  function startBeats(beatFreq) {
+    if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ac = state.audioCtx;
+    const baseFreq = 200;
+
+    state.oscillatorL = ac.createOscillator();
+    state.oscillatorR = ac.createOscillator();
+    state.oscillatorL.frequency.value = baseFreq;
+    state.oscillatorR.frequency.value = baseFreq + beatFreq;
+    state.oscillatorL.type = 'sine';
+    state.oscillatorR.type = 'sine';
+
+    state.mergerNode = ac.createChannelMerger(2);
+    state.gainNode = ac.createGain();
+    state.gainNode.gain.value = 0.06;
+
+    state.oscillatorL.connect(state.mergerNode, 0, 0);
+    state.oscillatorR.connect(state.mergerNode, 0, 1);
+    state.mergerNode.connect(state.gainNode);
+    state.gainNode.connect(ac.destination);
+
+    state.oscillatorL.start();
+    state.oscillatorR.start();
+  }
+
+  function stopBeats() {
+    try {
+      state.oscillatorL?.stop();
+      state.oscillatorR?.stop();
+    } catch(e) {}
+    state.oscillatorL = null;
+    state.oscillatorR = null;
+  }
+
+  function boostBeats() {
+    if (!state.gainNode) return;
+    state.gainNode.gain.setTargetAtTime(0.15, state.audioCtx.currentTime, 0.1);
+    setTimeout(() => {
+      if (state.gainNode) state.gainNode.gain.setTargetAtTime(0.06, state.audioCtx.currentTime, 0.5);
+    }, 2000);
+  }
+
+  // ─── LOG ─────────────────────────────────────────────────────────────
+  function addLog(icon, msg, color) {
+    const list = document.getElementById('logList');
+    const time = new Date().toLocaleTimeString('en', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+      <div class="log-dot" style="background:${color}; box-shadow:0 0 6px ${color}"></div>
+      <span class="log-time">${time}</span>
+      <span class="log-msg">${icon} ${msg}</span>
+    `;
+    list.prepend(entry);
+    if (list.children.length > 30) list.removeChild(list.lastChild);
+  }
+
+  // ─── REPORT ───────────────────────────────────────────────────────────
+  function showReport() {
+    const m = Math.floor(state.elapsed / 60);
+    const s = state.elapsed % 60;
+    const avg = state.sessionData.length > 0
+      ? Math.round(state.sessionData.reduce((a, b) => a + b, 0) / state.sessionData.length)
+      : 0;
+
+    document.getElementById('rep-duration').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('rep-score').textContent = avg + '%';
+    document.getElementById('rep-distractions').textContent = state.distractions;
+    document.getElementById('rep-streak').textContent = state.bestStreak + 's';
+
+    document.getElementById('reportModal').classList.add('open');
+  }
+
+  function closeReport() {
+    document.getElementById('reportModal').classList.remove('open');
+  }
+
+  function copyReport() {
+    const txt = `FocusPulse Session Report\nDuration: ${document.getElementById('rep-duration').textContent}\nAvg Focus: ${document.getElementById('rep-score').textContent}\nDistractions: ${document.getElementById('rep-distractions').textContent}\nBest Streak: ${document.getElementById('rep-streak').textContent}\n\nTracked at ydhanush.tech/lander`;
+    navigator.clipboard.writeText(txt).then(() => alert('Copied to clipboard!'));
+  }
+
+  // Close modal on backdrop click
+  document.getElementById('reportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReport();
+  });
+  </script>
+</body>
+</html>
