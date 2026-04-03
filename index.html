@@ -10,7 +10,7 @@
   <main class="app-shell">
     <header>
       <h1>FocusPulse</h1>
-      <p>AI-powered session-grade focus coach (local, no backend).</p>
+      <p>AI-powered session-grade focus coach</p>
     </header>
 
     <section class="controls">
@@ -18,36 +18,68 @@
       <button id="stopBtn" disabled>Stop</button>
     </section>
 
-    <section class="status-grid">
-      <article class="card">
-        <h2>Focus Score</h2>
-        <div class="ring-container">
-          <svg viewBox="0 0 240 240" class="ring-svg">
-            <circle cx="120" cy="120" r="104" stroke="#2b3345" stroke-width="8" fill="none"></circle>
-            <circle id="focusRing" cx="120" cy="120" r="104" stroke="#00ffa3" stroke-width="8" fill="none" stroke-dasharray="653.45" stroke-dashoffset="653.45"></circle>
-          </svg>
-          <div class="ring-label">
-            <span id="scoreValue">0</span>
-          </div>
+    <!-- Main Layout: Camera (Left) + Stats (Right) -->
+    <section class="main-layout">
+      <div class="camera-section">
+        <div class="video-wrap">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="camera-label">Camera</div>
         </div>
-        <p id="scoreStatus">Idle</p>
-      </article>
+      </div>
 
-      <article class="card">
-        <h2>Heatmap</h2>
-        <p id="focusMode">Relax</p>
-        <p>Duration: <span id="sessionDuration">0s</span></p>
-        <p>Distractions: <span id="distractionCount">0</span></p>
-        <p>Best Streak: <span id="streakValue">0s</span></p>
-      </article>
+      <div class="stats-section">
+        <article class="card card-compact">
+          <h2>Focus Score</h2>
+          <div class="ring-container-small">
+            <svg viewBox="0 0 240 240" class="ring-svg">
+              <circle cx="120" cy="120" r="104" stroke="#2b3345" stroke-width="8" fill="none"></circle>
+              <circle id="focusRing" cx="120" cy="120" r="104" stroke="#00ffa3" stroke-width="8" fill="none" stroke-dasharray="653.45" stroke-dashoffset="653.45"></circle>
+            </svg>
+            <div class="ring-label">
+              <span id="scoreValue">0</span>
+            </div>
+          </div>
+          <p id="scoreStatus" style="margin: 8px 0;">Idle</p>
+        </article>
+
+        <article class="card card-compact">
+          <h2>Session Stats</h2>
+          <div class="stats-content">
+            <p>Mode: <span id="focusMode">Relax</span></p>
+            <p>Duration: <span id="sessionDuration">0s</span></p>
+            <p>Distractions: <span id="distractionCount">0</span></p>
+            <p>Best Streak: <span id="streakValue">0s</span></p>
+          </div>
+        </article>
+
+        <!-- Category Criteria -->
+        <article class="card card-compact">
+          <h2>Focus Categories</h2>
+          <div class="category-criteria">
+            <div class="category-item">
+              <div class="category-label">Gamma</div>
+              <div class="category-desc">Exceptional (85-100)</div>
+            </div>
+            <div class="category-item">
+              <div class="category-label">Delta</div>
+              <div class="category-desc">Strong (75-84)</div>
+            </div>
+            <div class="category-item">
+              <div class="category-label">Beta</div>
+              <div class="category-desc">Good (55-74)</div>
+            </div>
+            <div class="category-item">
+              <div class="category-label">Alpha</div>
+              <div class="category-desc">Building (0-54)</div>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
 
+    <!-- Waveform -->
     <section class="visuals">
-      <div class="video-wrap">
-        <video id="video" autoplay muted playsinline></video>
-        <div class="camera-label">Camera</div>
-      </div>
-      <canvas id="waveCanvas" width="640" height="140"></canvas>
+      <canvas id="waveCanvas" width="640" height="100"></canvas>
     </section>
 
     <section class="log-panel">

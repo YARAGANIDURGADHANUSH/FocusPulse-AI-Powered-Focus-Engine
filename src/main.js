@@ -34,7 +34,7 @@ const waveform = new Waveform(UI.waveCanvas);
 const dashboard = new Dashboard({
   scoreEl: UI.scoreValue,
   statusEl: UI.scoreStatus,
-  modeEl: UI.focusMode,
+  modeEl: null,
   durationEl: UI.sessionDuration,
   distractionEl: UI.distractionCount,
   streakEl: UI.streakValue,
@@ -333,8 +333,15 @@ function downloadCertificate() {
   CertificateGenerator.downloadCertificate(category, categoryDetails, summary, focusMetrics);
 }
 
-UI.startBtn.addEventListener('click', startSession);
-UI.stopBtn.addEventListener('click', stopSession);
+UI.startBtn.addEventListener('click', (e) => {
+  console.log('Start button clicked');
+  startSession();
+});
+
+UI.stopBtn.addEventListener('click', (e) => {
+  console.log('Stop button clicked');
+  stopSession();
+});
 
 // Report modal handlers
 const reportModal = document.getElementById('reportModal');

@@ -265,3 +265,153 @@ canvas { width: 100%; height: 140px; border-radius: 10px; border: 1px solid #1b2
     flex: 1;
   }
 }
+
+/* New Layout: Main Layout with Camera on Left */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.camera-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.camera-section .video-wrap {
+  min-height: 340px;
+  flex: 1;
+}
+
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 360px;
+  padding-right: 6px;
+}
+
+/* Compact Cards */
+.card-compact {
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid #1d2b43;
+  border-radius: 10px;
+}
+
+.card-compact h2 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #d4deee;
+}
+
+.card-compact p {
+  margin: 4px 0;
+  font-size: 0.85rem;
+}
+
+/* Smaller Ring Container */
+.ring-container-small {
+  position: relative;
+  width: 100px;
+  margin: 6px auto 8px;
+}
+
+.ring-container-small .ring-label {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* Stats Content */
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-content p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #d4deee;
+}
+
+.stats-content span {
+  color: #00ffa3;
+  font-weight: 600;
+}
+
+/* Category Criteria Display */
+.category-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.category-item {
+  background: rgba(0, 255, 163, 0.08);
+  border-left: 3px solid #00ffa3;
+  padding: 8px 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-label {
+  font-weight: 700;
+  color: #00ffa3;
+  font-size: 0.8rem;
+  min-width: 60px;
+}
+
+.category-desc {
+  font-size: 0.75rem;
+  color: #8ea0b8;
+  text-align: right;
+}
+
+/* Waveform Section */
+.visuals {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.visuals canvas {
+  width: 100%;
+  max-width: 100%;
+  height: 100px;
+}
+
+/* Responsive Layout */
+@media (max-width: 900px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-section {
+    max-height: none;
+  }
+  
+  .camera-section .video-wrap {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-compact {
+    padding: 10px;
+  }
+  
+  .ring-container-small {
+    width: 80px;
+  }
+  
+  .ring-container-small .ring-label {
+    font-size: 1.4rem;
+  }
+}

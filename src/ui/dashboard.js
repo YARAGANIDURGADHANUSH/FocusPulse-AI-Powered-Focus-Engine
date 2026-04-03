@@ -23,7 +23,9 @@ export default class Dashboard {
     this.scoreEl.textContent = String(score);
     const category = this.getCategoryFromScore(score);
     this.statusEl.textContent = `${getFocusLevelDescription(score)} - ${category}`;
-    this.modeEl.textContent = getFocusMode(score);
+    if (this.modeEl) {
+      this.modeEl.textContent = getFocusMode(score);
+    }
     this.updateRing(score);
     this.addLog(`Score: ${score} | ${category} | Face: ${details.faceScore}% | Stability: ${details.stabilityScore}%`);
   }
