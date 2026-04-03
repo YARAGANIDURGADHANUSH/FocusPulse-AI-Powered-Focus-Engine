@@ -56,6 +56,59 @@
     </section>
   </main>
 
+  <!-- Report Card Modal -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="report-card">
+      <div class="report-header">
+        <h1>FocusPulse Session Report</h1>
+        <p class="timestamp" id="reportTimestamp"></p>
+      </div>
+
+      <div class="performance-badge" id="performanceBadge">
+        <div class="badge-circle" id="badgeCircle"></div>
+        <div class="badge-info">
+          <div class="category-name" id="categoryName">Deep Work</div>
+          <div class="category-label" id="categoryLabel">Beta</div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Session Duration</div>
+          <div class="metric-value" id="repDuration">0:00</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Average Focus</div>
+          <div class="metric-value" id="repAvgFocus">0%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Distractions</div>
+          <div class="metric-value" id="repDistractions">0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Best Streak</div>
+          <div class="metric-value" id="repBestStreak">0s</div>
+        </div>
+      </div>
+
+      <div class="criteria-section">
+        <h3>Focus Category Criteria</h3>
+        <div class="criteria-list" id="criteriaList"></div>
+      </div>
+
+      <div class="insights-section">
+        <h3>Session Insights</h3>
+        <p id="sessionInsight"></p>
+      </div>
+
+      <div class="report-actions">
+        <button id="downloadPdfBtn" class="btn-primary">⬇ Download PDF</button>
+        <button id="newSessionBtn" class="btn-secondary">↻ New Session</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="src/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>

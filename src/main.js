@@ -3,6 +3,7 @@ import DetectionEngine from './core/detectionEngine.js';
 import FocusEngine from './core/focusEngine.js';
 import AudioEngine from './core/audioEngine.js';
 import SessionTracker from './analytics/sessionTracker.js';
+import { categorizePerformance, generateInsight } from './analytics/reportGenerator.js';
 import Waveform from './ui/waveform.js';
 import Dashboard from './ui/dashboard.js';
 
@@ -137,11 +138,96 @@ function stopSession() {
   dashboard.addLog('Session stopped');
   UI.startBtn.disabled = false;
   UI.stopBtn.disabled = true;
+  
   const summary = sessionTracker.summary();
-  dashboard.addLog(`Session summary: ${JSON.stringify(summary)}`);
+  displayReportCard(summary);
+}
+
+function displayReportCard(summary) {
+  const { category, label, criteria } = categorizePerformance(summary);
+  const insight = generateInsight(category, summary);
+  const reportModal = document.getElementById('reportModal');
+
+  // Format duration
+  const mins = Math.floor(summary.duration / 60);
+  const secs = summary.duration % 60;
+  const durationStr = `${mins}:${String(secs).padStart(2, '0')}`;
+
+  // Update modal content
+  document.getElementById('reportTimestamp').textContent = new Date().toLocaleString();
+  document.getElementById('badgeCircle').textContent = label.charAt(0).toUpperCase();
+  document.getElementById('badgeCircle').style.background = getGradient(label);
+  document.getElementById('categoryName').textContent = category;
+  document.getElementById('categoryLabel').textContent = `Category: ${label.charAt(0).toUpperCase() + label.slice(1)}`;
+
+  document.getElementById('repDuration').textContent = durationStr;
+  document.getElementById('repAvgFocus').textContent = `${summary.averageFocus}%`;
+  document.getElementById('repDistractions').textContent = summary.distractions;
+  document.getElementById('repBestStreak').textContent = `${summary.bestStreak}s`;
+
+  // Render criteria
+  const criteriaList = document.getElementById('criteriaList');
+  criteriaList.innerHTML = criteria.map(c => `
+    <div class="criterion ${c.met ? 'met' : 'unmet'}">
+      <span class="criterion-check">${c.met ? '✓' : '✗'}</span>
+      <strong>${c.name}:</strong> ${c.value} (${c.threshold})
+    </div>
+  `).join('');
+
+  document.getElementById('sessionInsight').textContent = insight;
+
+  // Hide event log, show report
+  document.getElementById('logPanel').style.display = 'none';
+  reportModal.classList.add('open');
+}
+
+function getGradient(label) {
+  const gradients = {
+    gamma: 'radial-gradient(circle, #ff6b35, #cc3d1f)',
+    delta: 'radial-gradient(circle, #7c6fff, #5a4fbf)',
+    beta: 'radial-gradient(circle, #ffb800, #cc9300)',
+    alpha: 'radial-gradient(circle, #00ffa3, #008a5f)',
+  };
+  return gradients[label] || gradients.alpha;
+}
+
+function downloadReportPDF() {
+  const reportCard = document.querySelector('.report-card');
+  const html2pdf = window.html2pdf;
+
+  if (!html2pdf) {
+    alert('PDF library loading... Please try again in a moment.');
+    // Lazy load html2pdf
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => downloadReportPDF();
+    document.head.appendChild(script);
+    return;
+  }
+
+  const options = {
+    margin: 10,
+    filename: `FocusPulse-Report-${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+  };
+
+  html2pdf().set(options).from(reportCard).save();
 }
 
 UI.startBtn.addEventListener('click', startSession);
 UI.stopBtn.addEventListener('click', stopSession);
+
+// Report modal handlers
+const reportModal = document.getElementById('reportModal');
+const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+const newSessionBtn = document.getElementById('newSessionBtn');
+
+downloadPdfBtn.addEventListener('click', downloadReportPDF);
+newSessionBtn.addEventListener('click', () => {
+  reportModal.classList.remove('open');
+  document.getElementById('logPanel').style.display = 'flex';
+});
 
 export { startSession, stopSession };
