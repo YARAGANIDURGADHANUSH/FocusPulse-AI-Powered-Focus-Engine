@@ -144,7 +144,7 @@ function stopSession() {
 }
 
 function displayReportCard(summary) {
-  const { category, label, criteria } = categorizePerformance(summary);
+  const { category, label, criteria, categoryDetails } = categorizePerformance(summary);
   const insight = generateInsight(category, summary);
   const reportModal = document.getElementById('reportModal');
 
@@ -157,22 +157,36 @@ function displayReportCard(summary) {
   document.getElementById('reportTimestamp').textContent = new Date().toLocaleString();
   document.getElementById('badgeCircle').textContent = label.charAt(0).toUpperCase();
   document.getElementById('badgeCircle').style.background = getGradient(label);
-  document.getElementById('categoryName').textContent = category;
-  document.getElementById('categoryLabel').textContent = `Category: ${label.charAt(0).toUpperCase() + label.slice(1)}`;
+  document.getElementById('categoryName').textContent = categoryDetails.name;
+  document.getElementById('categoryLabel').textContent = categoryDetails.description;
 
   document.getElementById('repDuration').textContent = durationStr;
   document.getElementById('repAvgFocus').textContent = `${summary.averageFocus}%`;
   document.getElementById('repDistractions').textContent = summary.distractions;
   document.getElementById('repBestStreak').textContent = `${summary.bestStreak}s`;
 
-  // Render criteria
+  // Render session criteria
   const criteriaList = document.getElementById('criteriaList');
-  criteriaList.innerHTML = criteria.map(c => `
-    <div class="criterion ${c.met ? 'met' : 'unmet'}">
-      <span class="criterion-check">${c.met ? '✓' : '✗'}</span>
-      <strong>${c.name}:</strong> ${c.value} (${c.threshold})
+  criteriaList.innerHTML = `
+    <div style="margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #2b3345;">
+      <h4 style="margin: 0 0 8px; font-size: 0.9rem; color: #00ffa3;">Your Session Performance</h4>
+      ${criteria.map(c => `
+        <div class="criterion ${c.met ? 'met' : 'unmet'}">
+          <span class="criterion-check">${c.met ? '✓' : '✗'}</span>
+          <strong>${c.name}:</strong> ${c.value} (${c.threshold})
+        </div>
+      `).join('')}
     </div>
-  `).join('');
+    <div>
+      <h4 style="margin: 0 0 8px; font-size: 0.9rem; color: #00ffa3;">${categoryDetails.name} Requirements</h4>
+      ${categoryDetails.requirements.map(req => `
+        <div class="criterion met" style="border-left-color: #00ffa3;">
+          <span class="criterion-check">•</span>
+          ${req}
+        </div>
+      `).join('')}
+    </div>
+  `;
 
   document.getElementById('sessionInsight').textContent = insight;
 

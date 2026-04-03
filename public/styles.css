@@ -85,6 +85,9 @@ canvas { width: 100%; height: 140px; border-radius: 10px; border: 1px solid #1b2
 .criteria-section h3, .insights-section h3 {
   font-size: 1rem; margin: 0 0 12px; color: #e8ecf4;
 }
+.criteria-section h4 {
+  font-size: 0.85rem; margin: 0 0 8px; color: #00ffa3; font-weight: 600;
+}
 .criteria-list { display: flex; flex-direction: column; gap: 8px; }
 .criterion {
   background: rgba(0,255,163,0.08); border-left: 3px solid #00ffa3;

@@ -58,6 +58,7 @@ export function categorizePerformance(summary) {
     label,
     score,
     criteria: generateCriteria(averageFocus, distractionFrequency, bestStreak, duration),
+    categoryDetails: getCategoryDetails(label),
   };
 }
 
@@ -94,6 +95,53 @@ function generateCriteria(avgFocus, distractionFreq, bestStreak, duration) {
   });
 
   return criteria;
+}
+
+function getCategoryDetails(label) {
+  const details = {
+    gamma: {
+      name: 'Gamma — Exceptional',
+      description: 'Peak performance focus with mastery-level discipline.',
+      requirements: [
+        'Average Focus: 85%+',
+        'Distractions: <3 per minute',
+        'Consistency: >80% of session',
+        'Focus Stability: Unwavering attention control',
+      ],
+    },
+    delta: {
+      name: 'Delta — Strong',
+      description: 'Excellent focus management with minimal interruptions.',
+      requirements: [
+        'Average Focus: 75-84%',
+        'Distractions: 3-6 per minute',
+        'Consistency: 60-79% of session',
+        'Focus Stability: Good attention control with occasional minor dips',
+      ],
+    },
+    beta: {
+      name: 'Beta — Good',
+      description: 'Solid focus with moderate distractions managed well.',
+      requirements: [
+        'Average Focus: 55-74%',
+        'Distractions: 6-12 per minute',
+        'Consistency: 40-59% of session',
+        'Focus Stability: Fair attention with regular recovery',
+      ],
+    },
+    alpha: {
+      name: 'Alpha — Building',
+      description: 'Early-stage focus development with learning opportunity.',
+      requirements: [
+        'Average Focus: <55%',
+        'Distractions: >12 per minute',
+        'Consistency: <40% of session',
+        'Focus Stability: Frequent interruptions; practice increases control',
+      ],
+    },
+  };
+
+  return details[label] || details.alpha;
 }
 
 export function generateInsight(category, summary) {
