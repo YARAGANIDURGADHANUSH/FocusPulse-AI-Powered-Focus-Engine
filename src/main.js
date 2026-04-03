@@ -14,7 +14,6 @@ const UI = {
   video: document.getElementById('video'),
   scoreValue: document.getElementById('scoreValue'),
   scoreStatus: document.getElementById('scoreStatus'),
-  focusMode: document.getElementById('focusMode'),
   sessionDuration: document.getElementById('sessionDuration'),
   distractionCount: document.getElementById('distractionCount'),
   streakValue: document.getElementById('streakValue'),
