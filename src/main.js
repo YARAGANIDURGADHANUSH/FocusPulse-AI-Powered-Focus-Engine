@@ -9,6 +9,8 @@ import { CertificateGenerator, ReportGenerator } from './analytics/certificateGe
 import Waveform from './ui/waveform.js';
 import Dashboard from './ui/dashboard.js';
 
+console.log('✅ All modules imported successfully');
+
 // Check for required elements
 const UI = {
   video: document.getElementById('video'),
@@ -355,46 +357,53 @@ function downloadCertificate() {
   CertificateGenerator.downloadCertificate(category, categoryDetails, summary, focusMetrics);
 }
 
-// Wrap entire button setup in DOMContentLoaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupButtons);
-} else {
-  setupButtons();
-}
-
 function setupButtons() {
   console.log('🔧 Setting up button event listeners...');
   
   // Double-check buttons exist
   if (!UI.startBtn || !UI.stopBtn) {
     console.error('❌ CRITICAL: Buttons not found!');
+    console.log('UI.startBtn:', UI.startBtn);
+    console.log('UI.stopBtn:', UI.stopBtn);
     return;
   }
 
+  console.log('✓ Buttons found, attaching listeners...');
+
   UI.startBtn.addEventListener('click', (e) => {
-    console.log('✓ Start button clicked', e);
+    console.log('✓✓✓ START BUTTON CLICKED ✓✓✓', e);
     console.log('Start button disabled state:', UI.startBtn.disabled);
     try {
+      console.log('Calling startSession...');
       startSession();
+      console.log('startSession completed');
     } catch(err) {
       console.error('Error starting session:', err);
+      console.error('Stack trace:', err.stack);
       AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
     }
   });
 
   UI.stopBtn.addEventListener('click', (e) => {
-    console.log('✓ Stop button clicked', e);
+    console.log('✓✓✓ STOP BUTTON CLICKED ✓✓✓', e);
     console.log('Stop button disabled state:', UI.stopBtn.disabled);
     try {
+      console.log('Calling stopSession...');
       stopSession();
+      console.log('stopSession completed');
     } catch(err) {
       console.error('Error stopping session:', err);
+      console.error('Stack trace:', err.stack);
       AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
     }
   });
 
   console.log('✅ Button event listeners attached successfully');
 }
+
+// Initialize buttons immediately
+console.log('Initializing buttons...');
+setupButtons();
 
 // Initialization complete
 console.log('✅ FocusPulse initialized successfully');
