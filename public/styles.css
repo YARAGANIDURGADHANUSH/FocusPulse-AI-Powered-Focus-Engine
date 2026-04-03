@@ -13,8 +13,7 @@ body { margin: 0; background: radial-gradient(circle at 10% 10%, #121a2b, #080f1
 .app-shell { max-width: 1040px; margin: 24px auto; padding: 16px; display: grid; gap: 18px; }
 header { text-align: center; }
 header h1 { margin: 0; font-size: 1.85rem; }
-.controls { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.controls select, .controls button { padding: 10px 14px; border-radius: 8px; border: 1px solid #2b3345; background: #10203a; color: var(--text); }
+.controls { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .controls button { min-width: 98px; cursor: pointer; }
 .status-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .card { background: var(--surface); border: 1px solid #1d2b43; border-radius: 14px; padding: 16px; }

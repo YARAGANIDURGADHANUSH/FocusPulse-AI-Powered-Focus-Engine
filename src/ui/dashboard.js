@@ -27,10 +27,13 @@ export default class Dashboard {
     this.ringEl.style.stroke = score > 70 ? '#00ffa3' : score > 40 ? '#ffb800' : '#ff3b5c';
   }
 
-  updateStats({ duration, distractions, streak }) {
+  updateStats({ duration, distractions, streak, mode }) {
     this.durationEl.textContent = `${duration}s`;
     this.distractionEl.textContent = distractions;
     this.streakEl.textContent = `${streak}s`;
+    if (this.modeEl && mode) {
+      this.modeEl.textContent = mode;
+    }
   }
 
   addLog(message) {

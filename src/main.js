@@ -19,7 +19,6 @@ const UI = {
   waveCanvas: document.getElementById('waveCanvas'),
   startBtn: document.getElementById('startBtn'),
   stopBtn: document.getElementById('stopBtn'),
-  modeSelect: document.getElementById('modeSelect'),
 };
 
 const cameraService = new CameraService(UI.video);
@@ -43,11 +42,16 @@ let running = false;
 let lastTime = performance.now();
 let lastDistractTime = 0;
 
-const MODES = ['alpha', 'beta', 'theta', 'gamma'];
+const MODES = {
+  'Deep Work': 'theta',
+  'Sustained Attention': 'beta',
+  'Light Focus': 'alpha',
+};
 
-function setFocusMode(mode) {
-  audioEngine.setMode(mode);
-  dashboard.addLog(`Focus mode set to ${mode}`);
+function getAutoMode(score) {
+  if (score >= 80) return 'theta';
+  if (score >= 55) return 'beta';
+  return 'alpha';
 }
 
 function onAnimationFrame() {
@@ -76,22 +80,27 @@ function onAnimationFrame() {
     lastDistractTime = Date.now();
     dashboard.addLog('Distraction detected: face not visible');
     if (focusEngine.distractions > 1) {
-      audioEngine.start(MODES[Math.floor(Math.random() * MODES.length)]);
+      audioEngine.start('alpha');
     }
   }
 
-  if (result.value >= 75 && !audioEngine.isRunning) {
-    audioEngine.start(UI.modeSelect.value);
+  const currentMode = getAutoMode(result.value);
+  if (result.value >= 55 && !audioEngine.isRunning) {
+    audioEngine.start(currentMode);
   }
-  if (result.value < 55 && audioEngine.isRunning) {
+  if (result.value < 35 && audioEngine.isRunning) {
     audioEngine.stop();
   }
 
   dashboard.updateScore(result.value, result.details);
+  
+  const modeDescription = result.value >= 80 ? 'Deep Work' : result.value >= 55 ? 'Sustained Attention' : 'Light Focus';
+  
   dashboard.updateStats({
     duration: Math.floor(focusEngine.sessionSeconds),
     distractions: focusEngine.distractions,
     streak: result.details.bestStreak,
+    mode: modeDescription,
   });
 
   window.requestAnimationFrame(onAnimationFrame);
@@ -107,10 +116,10 @@ async function startSession() {
     focusEngine.currentStreak = 0;
     focusEngine.highestStreak = 0;
     lastDistractTime = 0;
+    audioEngine.initialize();
     running = true;
     lastTime = performance.now();
     dashboard.addLog('Session started');
-    audioEngine.start(UI.modeSelect.value);
     onAnimationFrame();
     UI.startBtn.disabled = true;
     UI.stopBtn.disabled = false;
@@ -134,6 +143,5 @@ function stopSession() {
 
 UI.startBtn.addEventListener('click', startSession);
 UI.stopBtn.addEventListener('click', stopSession);
-UI.modeSelect.addEventListener('change', (event) => setFocusMode(event.target.value));
 
 export { startSession, stopSession };
