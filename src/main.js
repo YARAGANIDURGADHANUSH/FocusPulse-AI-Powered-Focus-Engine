@@ -9,6 +9,7 @@ import { CertificateGenerator, ReportGenerator } from './analytics/certificateGe
 import Waveform from './ui/waveform.js';
 import Dashboard from './ui/dashboard.js';
 
+// Check for required elements
 const UI = {
   video: document.getElementById('video'),
   scoreValue: document.getElementById('scoreValue'),
@@ -23,6 +24,21 @@ const UI = {
   startBtn: document.getElementById('startBtn'),
   stopBtn: document.getElementById('stopBtn'),
 };
+
+// Verify all UI elements exist
+console.log('=== FocusPulse Initialization ===');
+console.log('UI Elements found:', {
+  video: !!UI.video,
+  scoreValue: !!UI.scoreValue,
+  scoreStatus: !!UI.scoreStatus,
+  startBtn: !!UI.startBtn,
+  stopBtn: !!UI.stopBtn,
+});
+
+if (!UI.startBtn || !UI.stopBtn) {
+  console.error('CRITICAL: Start/Stop buttons not found in DOM');
+  throw new Error('Required UI elements missing');
+}
 
 const cameraService = new CameraService(UI.video);
 const detectionEngine = new DetectionEngine(UI.video);
@@ -41,6 +57,8 @@ const dashboard = new Dashboard({
   ringEl: UI.focusRing,
   logEl: UI.logPanel,
 });
+
+console.log('All engines initialized successfully');
 
 let running = false;
 let lastTime = performance.now();
@@ -334,13 +352,23 @@ function downloadCertificate() {
 }
 
 UI.startBtn.addEventListener('click', (e) => {
-  console.log('Start button clicked');
-  startSession();
+  console.log('✓ Start button clicked');
+  try {
+    startSession();
+  } catch(err) {
+    console.error('Error starting session:', err);
+    AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
+  }
 });
 
 UI.stopBtn.addEventListener('click', (e) => {
-  console.log('Stop button clicked');
-  stopSession();
+  console.log('✓ Stop button clicked');
+  try {
+    stopSession();
+  } catch(err) {
+    console.error('Error stopping session:', err);
+    AlertSystem.show(`❌ Error: ${err.message}`, 'danger');
+  }
 });
 
 // Report modal handlers
@@ -359,5 +387,9 @@ newSessionBtn.addEventListener('click', () => {
   reportModal.classList.remove('open');
   document.getElementById('logPanel').style.display = 'flex';
 });
+
+// Initialization complete
+console.log('✅ FocusPulse initialized successfully');
+console.log('Ready to start session. Click Start button.');
 
 export { startSession, stopSession };
