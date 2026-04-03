@@ -1,70 +1,58 @@
-# 🧠 FocusPulse — AI-Powered Focus Engine
+# FocusPulse — AI-Powered Focus Engine
 
-> Stay in the zone. Always.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-FocusPulse is a real-time, in-browser focus tracker that uses your webcam and pixel-analysis AI to detect when you drift — then fires binaural beats to pull you back. No install, no cloud, no data sent anywhere.
+FocusPulse is an innovative, real-time focus tracking application that leverages computer vision and audio cues to enhance productivity. Utilizing your device's webcam, it analyzes facial presence and provides instant feedback through a dynamic focus score, binaural beats, and session analytics—all processed locally for maximum privacy.
 
-**Live demo:** https://ydhanush.tech/lander
+**Live Demo:** [https://ydhanush.tech/lander](https://ydhanush.tech/lander)
 
----
+## Table of Contents
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Benefits](#benefits)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [License](#license)
 
-## ✨ Features
+## Features
+- **Real-Time Face Detection**: Employs skin-tone heuristics on pixel data to detect facial presence.
+- **Dynamic Focus Score**: Displays a 0–100 focus score with an animated ring interface.
+- **Binaural Beats Integration**: Generates Alpha, Beta, Theta, and Gamma waves using the Web Audio API.
+- **Focus Waveform Visualization**: Renders a live canvas-based waveform of focus levels over time.
+- **Distraction Logging**: Maintains a timestamped log of attention breaks.
+- **Session Analytics**: Provides shareable reports including duration, average score, streaks, and distractions.
+- **Privacy-First Design**: All processing occurs locally; no data is transmitted or stored externally.
 
-| Feature | Description |
-|---|---|
-| 🎥 **Face Presence Detection** | Detects if your face is in frame using skin-tone heuristics on pixel data |
-| 🔵 **Focus Score Ring** | Real-time 0–100 score with smooth animated ring |
-| 🎵 **Binaural Beats** | Alpha, Beta, Theta, Gamma — all generated via Web Audio API |
-| 📊 **Focus Waveform** | Live canvas-drawn waveform of your focus over time |
-| 📋 **Distraction Log** | Timestamped log of every attention break |
-| 📈 **Session Report** | Shareable summary with duration, avg score, streak, distractions |
-| 🔒 **100% Local** | Camera feed never leaves your device |
+## How It Works
+FocusPulse operates entirely within the browser, requiring no installation or external dependencies. Upon starting a session, the application accesses the user's webcam to monitor facial activity. It uses pixel analysis to assess focus levels, updating the score in real-time. When distractions are detected, binaural beats are triggered to gently redirect attention. Session data is logged and summarized for review.
 
----
+## Benefits
+FocusPulse empowers users to maintain deep focus by offering immediate, non-intrusive feedback. It helps build self-awareness of productivity patterns, reduces micro-distractions, and supports sustained concentration during work or study sessions. Ideal for remote workers, students, and professionals seeking to optimize their cognitive performance.
 
-## 🚀 Deploy
+## Tech Stack
+- **Frontend Framework**: Vanilla HTML, CSS, and JavaScript (no external libraries)
+- **Audio Processing**: Web Audio API for binaural beat generation
+- **Media Access**: `getUserMedia` API for webcam integration
+- **Graphics Rendering**: Canvas API for pixel analysis and waveform visualization
+- **Styling and Animations**: CSS custom properties and keyframes for UI effects
 
-### GitHub Pages / Static Host
+## Installation
+FocusPulse is a single-file web application with no dependencies. To deploy:
 
-Just push `index.html` to your repo root. This is a **zero-dependency single-file app**.
+1. Clone or download the repository.
+2. Upload `index.html` to a static hosting service such as:
+   - **Vercel**: Configure with the provided `vercel.json` for automatic deployment.
+   - **GitHub Pages**: Host directly from your repository.
+   - **Other Platforms**: Any web server supporting static files.
 
-```bash
-git init
-git add .
-git commit -m "feat: initial focuspulse release"
-git remote add origin https://github.com/YOUR_USERNAME/focuspulse.git
-git push -u origin main
-```
+## Usage
+1. Open the application in a modern web browser with webcam support.
+2. Grant camera permissions when prompted.
+3. Click "Start Session" to begin monitoring.
+4. Monitor your focus score, waveform, and logs in real-time.
+5. Select binaural beat types as needed.
+6. End the session to view and share your report.
 
-Then in your web server (nginx/apache), point `/lander` to this file:
-
-```nginx
-location /lander {
-  alias /var/www/focuspulse;
-  try_files $uri $uri/ /lander/index.html;
-}
-```
-
-Or just drop `index.html` into your server's `/lander/` directory.
-
----
-
-## 🛠 Tech Stack
-
-- Vanilla HTML/CSS/JS — zero frameworks, zero dependencies
-- Web Audio API — real binaural beat generation
-- `getUserMedia` — webcam access
-- Canvas API — pixel analysis + waveform rendering
-- CSS custom properties + animations — all UI effects
-
----
-
-## 🏆 Hackathon Pitch
-
-> "Every knowledge worker loses 3+ hours daily to micro-distractions. FocusPulse is the first focus tracker that runs entirely in the browser — no extension, no install, no cloud — using your webcam as a passive awareness sensor and binaural beats as an acoustic nudge system. It doesn't interrupt you; it guards you."
-
----
-
-## 📄 License
-
-MIT — built for the people, by the people.
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
