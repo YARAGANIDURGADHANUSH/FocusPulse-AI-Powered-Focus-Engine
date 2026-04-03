@@ -6,6 +6,7 @@ export default class FocusEngine {
     this.distractions = 0;
     this.highestStreak = 0;
     this.currentStreak = 0;
+    this.lastStreakTime = 0;
   }
 
   updateSession(timeDiffSec) {
@@ -37,9 +38,10 @@ export default class FocusEngine {
 
     const rawScore = Math.min(100, Math.max(0, this.base + weighted * 0.5));
 
-    if(hasFace && stability > 0.65) {
+    if(hasFace && stability > 0.65 && Date.now() - this.lastStreakTime > 1000) {
       this.registerFocusedInterval();
-    } else {
+      this.lastStreakTime = Date.now();
+    } else if (!(hasFace && stability > 0.65)) {
       this.currentStreak = 0;
     }
 

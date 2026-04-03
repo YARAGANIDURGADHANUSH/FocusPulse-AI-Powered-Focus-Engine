@@ -41,6 +41,7 @@ const dashboard = new Dashboard({
 
 let running = false;
 let lastTime = performance.now();
+let lastDistractTime = 0;
 
 const MODES = ['alpha', 'beta', 'theta', 'gamma'];
 
@@ -69,10 +70,11 @@ function onAnimationFrame() {
   sessionTracker.addFocusSample(result.value);
   waveform.addSample(result.value);
 
-  if (result.value < 45 && detection.hasFace) {
+  if (!detection.hasFace && Date.now() - lastDistractTime > 3000) {
     focusEngine.registerDistraction();
-    sessionTracker.addDistraction('Low focus');
-    dashboard.addLog('Distraction detected: low focus score');
+    sessionTracker.addDistraction('Face not detected');
+    lastDistractTime = Date.now();
+    dashboard.addLog('Distraction detected: face not visible');
     if (focusEngine.distractions > 1) {
       audioEngine.start(MODES[Math.floor(Math.random() * MODES.length)]);
     }
@@ -87,7 +89,7 @@ function onAnimationFrame() {
 
   dashboard.updateScore(result.value, result.details);
   dashboard.updateStats({
-    duration: sessionTracker.duration || Math.floor(focusEngine.sessionSeconds),
+    duration: Math.floor(focusEngine.sessionSeconds),
     distractions: focusEngine.distractions,
     streak: result.details.bestStreak,
   });
@@ -104,6 +106,7 @@ async function startSession() {
     focusEngine.distractions = 0;
     focusEngine.currentStreak = 0;
     focusEngine.highestStreak = 0;
+    lastDistractTime = 0;
     running = true;
     lastTime = performance.now();
     dashboard.addLog('Session started');
