@@ -26,6 +26,16 @@ const UI = {
   stopBtn: document.getElementById('stopBtn'),
 };
 
+console.log('=== DEBUGGING UI ELEMENTS ===');
+console.log('startBtn element:', UI.startBtn);
+console.log('startBtn HTML:', UI.startBtn?.outerHTML);
+console.log('startBtn is disabled?', UI.startBtn?.disabled);
+console.log('stopBtn element:', UI.stopBtn);
+console.log('stopBtn is disabled?', UI.stopBtn?.disabled);
+
+// WRAP ENTIRE INITIALIZATION IN TRY-CATCH
+try {
+
 // Verify all UI elements exist
 console.log('=== FocusPulse Initialization ===');
 console.log('UI Elements found:', {
@@ -433,5 +443,21 @@ console.log('Ready to start session. Click Start button.');
 // Export functions globally for inline onclick handlers
 window.startFocus = startSession;
 window.stopFocus = stopSession;
+
+} catch (globalError) {  // END OF MAIN TRY-CATCH
+  console.error('❌❌❌ FATAL ERROR ❌❌❌');
+  console.error('Error:', globalError);
+  console.error('Stack:', globalError.stack);
+  document.body.innerHTML = `
+    <div style="color: red; padding: 20px; background: #1a1f2e; font-family: monospace;">
+      <h2>🔴 FocusPulse Failed to Load</h2>
+      <p><strong>Error:</strong> ${globalError.message}</p>
+      <pre style="background: #000; padding: 10px; overflow-x: auto; max-height: 300px;">
+${globalError.stack}
+      </pre>
+      <p>Please check the browser console (F12) for more details.</p>
+    </div>
+  `;
+}
 
 export { startSession, stopSession };
