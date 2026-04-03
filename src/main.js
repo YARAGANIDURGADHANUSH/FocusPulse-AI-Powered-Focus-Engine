@@ -42,12 +42,42 @@ const dashboard = new Dashboard({
 let running = false;
 let lastTime = performance.now();
 let lastDistractTime = 0;
+let lastNoFaceAlertTime = 0;
+let noFaceDetectedCount = 0;
 
 const MODES = {
   'Deep Work': 'theta',
   'Sustained Attention': 'beta',
   'Light Focus': 'alpha',
 };
+
+// Alert notification system
+class AlertSystem {
+  static show(message, type = 'info', duration = 4000) {
+    const existingAlert = document.querySelector('.alert-notification');
+    if (existingAlert) existingAlert.remove();
+
+    const alert = document.createElement('div');
+    alert.className = `alert-notification alert-${type}`;
+    alert.textContent = message;
+    alert.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      background: ${type === 'danger' ? '#ff3b5c' : type === 'warning' ? '#ffb800' : '#00ffa3'};
+      color: ${type === 'danger' || type === 'warning' ? '#fff' : '#000'};
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(alert);
+
+    setTimeout(() => alert.remove(), duration);
+  }
+}
 
 function getAutoMode(score) {
   if (score >= 80) return 'theta';
@@ -75,11 +105,26 @@ function onAnimationFrame() {
   sessionTracker.addFocusSample(result.value);
   waveform.addSample(result.value);
 
+  // No face detection alert system
+  if (!detection.hasFace) {
+    noFaceDetectedCount++;
+    if (noFaceDetectedCount > 15 && Date.now() - lastNoFaceAlertTime > 5000) {
+      // No face for ~0.5 seconds
+      AlertSystem.show('⚠ Face not detected - Please stay in frame', 'warning', 3000);
+      lastNoFaceAlertTime = Date.now();
+      focusEngine.registerDistraction();
+      sessionTracker.addDistraction('Face not detected');
+      dashboard.addLog('Alert: Face not detected in frame');
+    }
+  } else {
+    noFaceDetectedCount = 0;
+  }
+
   if (!detection.hasFace && Date.now() - lastDistractTime > 3000) {
     focusEngine.registerDistraction();
     sessionTracker.addDistraction('Face not detected');
     lastDistractTime = Date.now();
-    dashboard.addLog('Distraction detected: face not visible');
+    dashboard.addLog('Distraction: Face not visible');
     if (focusEngine.distractions > 1) {
       audioEngine.start('alpha');
     }
@@ -117,25 +162,31 @@ async function startSession() {
     focusEngine.currentStreak = 0;
     focusEngine.highestStreak = 0;
     lastDistractTime = 0;
+    lastNoFaceAlertTime = 0;
+    noFaceDetectedCount = 0;
     audioEngine.initialize();
     running = true;
     lastTime = performance.now();
     dashboard.addLog('Session started');
+    AlertSystem.show('✓ Focus Session Started', 'info', 2000);
     onAnimationFrame();
     UI.startBtn.disabled = true;
     UI.stopBtn.disabled = false;
   } catch (error) {
     dashboard.addLog(`Camera error: ${error.message}`);
+    AlertSystem.show(`❌ Camera Error: ${error.message}`, 'danger', 4000);
   }
 }
 
 function stopSession() {
   if (!running) return;
   running = false;
+  noFaceDetectedCount = 0;
   cameraService.stop();
   audioEngine.stop();
   sessionTracker.stop();
   dashboard.addLog('Session stopped');
+  AlertSystem.show('✓ Session Completed', 'info', 2000);
   UI.startBtn.disabled = false;
   UI.stopBtn.disabled = true;
   

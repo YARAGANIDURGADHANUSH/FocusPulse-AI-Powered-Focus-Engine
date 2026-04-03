@@ -12,19 +12,36 @@ export default class Dashboard {
     this.logEl = logEl;
   }
 
+  getCategoryFromScore(score) {
+    if (score >= 85) return 'Gamma (Exceptional)';
+    if (score >= 75) return 'Delta (Strong)';
+    if (score >= 55) return 'Beta (Good)';
+    return 'Alpha (Building)';
+  }
+
   updateScore(score, details) {
     this.scoreEl.textContent = String(score);
-    this.statusEl.textContent = getFocusLevelDescription(score);
+    const category = this.getCategoryFromScore(score);
+    this.statusEl.textContent = `${getFocusLevelDescription(score)} - ${category}`;
     this.modeEl.textContent = getFocusMode(score);
     this.updateRing(score);
-    this.addLog(`Score: ${score}; face:${details.faceScore}; stable:${details.stabilityScore}`);
+    this.addLog(`Score: ${score} | ${category} | Face: ${details.faceScore}% | Stability: ${details.stabilityScore}%`);
   }
 
   updateRing(score) {
     const circumference = this.ringEl.getTotalLength();
     const offset = circumference - (score / 100) * circumference;
     this.ringEl.style.strokeDashoffset = offset;
-    this.ringEl.style.stroke = score > 70 ? '#00ffa3' : score > 40 ? '#ffb800' : '#ff3b5c';
+    // Update ring color based on category
+    if (score >= 85) {
+      this.ringEl.style.stroke = '#ff6b35'; // Gamma - Orange Red
+    } else if (score >= 75) {
+      this.ringEl.style.stroke = '#7c6fff'; // Delta - Purple
+    } else if (score >= 55) {
+      this.ringEl.style.stroke = '#ffb800'; // Beta - Amber
+    } else {
+      this.ringEl.style.stroke = '#00ffa3'; // Alpha - Cyan
+    }
   }
 
   updateStats({ duration, distractions, streak, mode }) {
