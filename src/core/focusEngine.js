@@ -41,7 +41,7 @@ export default class FocusEngine {
     if(hasFace && stability > 0.65 && Date.now() - this.lastStreakTime > 1000) {
       this.registerFocusedInterval();
       this.lastStreakTime = Date.now();
-    } else if (!(hasFace && stability > 0.65)) {
+    } else if (!hasFace || stability <= 0.5) {
       this.currentStreak = 0;
     }
 
