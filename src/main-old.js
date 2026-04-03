@@ -98,26 +98,11 @@ function onAnimationFrame() {
   focusEngine.updateSession(dt);
   const detection = detectionEngine.detect();
 
-  // Eye tracking analysis
-  let eyeData = { eyeFocusScore: 50, gazeStability: 50, blinkRate: 0, blinkQuality: 'unknown' };
-  if (detection.hasFace && UI.video.readyState >= 2) {
-    const imageData = detectionEngine.sampleFrame();
-    eyeData = eyeTrackingEngine.analyze(imageData);
-    sessionTracker.addEyeMetrics(eyeData);
-    if (eyeData.eyeFocusScore > 60) {
-      focusEngine.recordRecovery(eyeData.eyeFocusScore);
-    }
-  }
-
-  // Track face stability
-  sessionTracker.addFaceStability(detection.stability);
-
   const result = focusEngine.score({
-    eyeFocusScore: eyeData.eyeFocusScore,
-    faceStability: detection.stability,
-    blinkQuality: eyeData.blinkQuality,
-    distractions: focusEngine.distractions,
     hasFace: detection.hasFace,
+    stability: detection.stability,
+    distractions: focusEngine.distractions,
+    skinRatio: detection.skinRatio,
   });
 
   sessionTracker.addFocusSample(result.value);
@@ -127,6 +112,7 @@ function onAnimationFrame() {
   if (!detection.hasFace) {
     noFaceDetectedCount++;
     if (noFaceDetectedCount > 15 && Date.now() - lastNoFaceAlertTime > 5000) {
+      // No face for ~0.5 seconds
       AlertSystem.show('⚠ Face not detected - Please stay in frame', 'warning', 3000);
       lastNoFaceAlertTime = Date.now();
       focusEngine.registerDistraction();
@@ -221,13 +207,6 @@ function displayReportCard(summary) {
   const secs = summary.duration % 60;
   const durationStr = `${mins}:${String(secs).padStart(2, '0')}`;
 
-  // Focus metrics
-  const focusMetrics = {
-    eyeFocus: summary.averageEyeFocus || 70,
-    gazeStability: summary.averageGazeStability || 65,
-    stability: summary.averageStability || 70,
-  };
-
   // Update modal content
   document.getElementById('reportTimestamp').textContent = new Date().toLocaleString();
   document.getElementById('badgeCircle').textContent = label.charAt(0).toUpperCase();
@@ -239,25 +218,6 @@ function displayReportCard(summary) {
   document.getElementById('repAvgFocus').textContent = `${summary.averageFocus}%`;
   document.getElementById('repDistractions').textContent = summary.distractions;
   document.getElementById('repBestStreak').textContent = `${summary.bestStreak}s`;
-
-  // Scientific metrics section
-  const scientificMetrics = `
-    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #2b3345;">
-      <h4 style="margin: 0 0 8px; font-size: 0.9rem; color: #00ffa3;">Scientific Metrics</h4>
-      <div class="criterion met">
-        <span class="criterion-check">📊</span>
-        <strong>Eye Focus Score:</strong> ${focusMetrics.eyeFocus}% - ${focusMetrics.eyeFocus >= 75 ? 'Excellent' : focusMetrics.eyeFocus >= 55 ? 'Good' : 'Needs Improvement'}
-      </div>
-      <div class="criterion met">
-        <span class="criterion-check">👁️</span>
-        <strong>Gaze Stability:</strong> ${focusMetrics.gazeStability}% - ${focusMetrics.gazeStability >= 75 ? 'Stable' : focusMetrics.gazeStability >= 50 ? 'Moderate' : 'Variable'}
-      </div>
-      <div class="criterion met">
-        <span class="criterion-check">🎯</span>
-        <strong>Blink Quality:</strong> ${summary.blinkQuality || 'normal'} - ${summary.averageBlinkRate || 15} blinks/min
-      </div>
-    </div>
-  `;
 
   // Render session criteria
   const criteriaList = document.getElementById('criteriaList');
@@ -280,7 +240,6 @@ function displayReportCard(summary) {
         </div>
       `).join('')}
     </div>
-    ${scientificMetrics}
   `;
 
   document.getElementById('sessionInsight').textContent = insight;
@@ -288,19 +247,6 @@ function displayReportCard(summary) {
   // Hide event log, show report
   document.getElementById('logPanel').style.display = 'none';
   reportModal.classList.add('open');
-
-  // Store for PDF generation
-  window.reportData = {
-    category,
-    categoryDetails,
-    summary,
-    focusMetrics,
-    eyeMetrics: {
-      blinkRate: summary.averageBlinkRate || 15,
-      blinkQuality: summary.blinkQuality || 'normal',
-      gazeStability: focusMetrics.gazeStability,
-    },
-  };
 }
 
 function getGradient(label) {
@@ -314,23 +260,28 @@ function getGradient(label) {
 }
 
 function downloadReportPDF() {
-  if (!window.reportData) {
-    alert('No report data available');
+  const reportCard = document.querySelector('.report-card');
+  const html2pdf = window.html2pdf;
+
+  if (!html2pdf) {
+    alert('PDF library loading... Please try again in a moment.');
+    // Lazy load html2pdf
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => downloadReportPDF();
+    document.head.appendChild(script);
     return;
   }
 
-  const { category, categoryDetails, summary, focusMetrics, eyeMetrics } = window.reportData;
-  ReportGenerator.downloadDetailedReport(category, summary, focusMetrics, eyeMetrics);
-}
+  const options = {
+    margin: 10,
+    filename: `FocusPulse-Report-${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+  };
 
-function downloadCertificate() {
-  if (!window.reportData) {
-    alert('No certificate data available');
-    return;
-  }
-
-  const { category, categoryDetails, summary, focusMetrics } = window.reportData;
-  CertificateGenerator.downloadCertificate(category, categoryDetails, summary, focusMetrics);
+  html2pdf().set(options).from(reportCard).save();
 }
 
 UI.startBtn.addEventListener('click', startSession);
@@ -340,12 +291,6 @@ UI.stopBtn.addEventListener('click', stopSession);
 const reportModal = document.getElementById('reportModal');
 const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 const newSessionBtn = document.getElementById('newSessionBtn');
-
-// Add certificate download button handler
-const downloadCertBtn = document.getElementById('downloadCertBtn');
-if (downloadCertBtn) {
-  downloadCertBtn.addEventListener('click', downloadCertificate);
-}
 
 downloadPdfBtn.addEventListener('click', downloadReportPDF);
 newSessionBtn.addEventListener('click', () => {
