@@ -1,0 +1,33 @@
+:root {
+  --bg: #0b0f1c;
+  --surface: #111827;
+  --text: #d4deee;
+  --muted: #8ea0b8;
+  --accent: #00ffa3;
+  --warn: #ffb800;
+  --danger: #ff3b5c;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(circle at 10% 10%, #121a2b, #080f1a 55%, #04070f); color: var(--text); font-family: Inter, system-ui, sans-serif; }
+.app-shell { max-width: 1040px; margin: 24px auto; padding: 16px; display: grid; gap: 18px; }
+header { text-align: center; }
+header h1 { margin: 0; font-size: 1.85rem; }
+.controls { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.controls select, .controls button { padding: 10px 14px; border-radius: 8px; border: 1px solid #2b3345; background: #10203a; color: var(--text); }
+.controls button { min-width: 98px; cursor: pointer; }
+.status-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.card { background: var(--surface); border: 1px solid #1d2b43; border-radius: 14px; padding: 16px; }
+.ring-container { position: relative; width: 180px; margin: 8px auto 12px; }
+.ring-svg { width: 100%; height: auto; transform: rotate(-90deg); }
+.ring-label { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; }
+.visuals { display: grid; gap: 14px; }
+.video-wrap { background: #050914; border: 1px solid #1b2b46; border-radius: 10px; position: relative; min-height: 240px; overflow: hidden; }
+video { width: 100%; height: 100%; object-fit: cover; }
+.camera-label { position: absolute; left: 10px; bottom: 10px; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 6px; color: var(--accent); font-weight: 600; }
+canvas { width: 100%; height: 140px; border-radius: 10px; border: 1px solid #1b2b46; background: #02060e; }
+.log-panel { background: var(--surface); border: 1px solid #1d2b43; border-radius: 10px; padding: 12px; }
+.log-panel h2 { margin: 0 0 10px; }
+#logPanel { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 6px; }
+.log-item { font-size: 0.8rem; background: #0f1b34; border-radius: 6px; padding: 7px 10px; color: var(--muted); }
+@media (max-width: 740px) { .app-shell { margin: 10px; } }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FocusPulse — AI-Powered Focus Engine</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header>
+      <h1>FocusPulse</h1>
+      <p>AI-powered session-grade focus coach (local, no backend).</p>
+    </header>
+
+    <section class="controls">
+      <label for="modeSelect">Focus Mode</label>
+      <select id="modeSelect">
+        <option value="alpha">Alpha (Relaxed Focus)</option>
+        <option value="beta">Beta (Active Focus)</option>
+        <option value="theta">Theta (Deep Work)</option>
+        <option value="gamma">Gamma (Peak Performance)</option>
+      </select>
+
+      <div class="buttons">
+        <button id="startBtn">Start</button>
+        <button id="stopBtn" disabled>Stop</button>
+      </div>
+    </section>
+
+    <section class="status-grid">
+      <article class="card">
+        <h2>Focus Score</h2>
+        <div class="ring-container">
+          <svg viewBox="0 0 240 240" class="ring-svg">
+            <circle cx="120" cy="120" r="104" stroke="#2b3345" stroke-width="8" fill="none"></circle>
+            <circle id="focusRing" cx="120" cy="120" r="104" stroke="#00ffa3" stroke-width="8" fill="none" stroke-dasharray="653.45" stroke-dashoffset="653.45"></circle>
+          </svg>
+          <div class="ring-label">
+            <span id="scoreValue">0</span>
+          </div>
+        </div>
+        <p id="scoreStatus">Idle</p>
+      </article>
+
+      <article class="card">
+        <h2>Heatmap</h2>
+        <p id="focusMode">Relax</p>
+        <p>Duration: <span id="sessionDuration">0s</span></p>
+        <p>Distractions: <span id="distractionCount">0</span></p>
+        <p>Best Streak: <span id="streakValue">0s</span></p>
+      </article>
+    </section>
+
+    <section class="visuals">
+      <div class="video-wrap">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="camera-label">Camera</div>
+      </div>
+      <canvas id="waveCanvas" width="640" height="140"></canvas>
+    </section>
+
+    <section class="log-panel">
+      <h2>Event Log</h2>
+      <div id="logPanel"></div>
+    </section>
+  </main>
+
+  <script type="module" src="../src/main.js"></script>
+</body>
+</html>

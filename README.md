@@ -49,10 +49,10 @@ FocusPulse is a single-file web application with no dependencies. To deploy:
 ## Usage
 1. Open the application in a modern web browser with webcam support.
 2. Grant camera permissions when prompted.
-3. Click "Start Session" to begin monitoring.
-4. Monitor your focus score, waveform, and logs in real-time.
-5. Select binaural beat types as needed.
-6. End the session to view and share your report.
+3. Click "Start" to begin a session.
+4. Monitor focus score, mode, and live waveform.
+5. Use the mode switcher to adapt audio support.
+6. Click "Stop" to end and capture session summary.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
